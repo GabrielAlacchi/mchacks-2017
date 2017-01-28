@@ -22,7 +22,7 @@ def bias_variable(name, shape, dtype=tf.float32, trainable=True, collection=tf.G
                            collections=[collection])
 
 
-def conv_layer(x, filter_size, num_features, strides, trainable=True, deconv=False, upscale=2):
+def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True, deconv=False, upscale=2, collection=tf.GraphKeys.GLOBAL_VARIABLES):
     x_shape = x.get_shape().as_list()
 
     filters_in = x_shape[-1]
@@ -33,11 +33,13 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, deconv=Fal
         kernel_shape = list(filter_size) + [filters_in, num_features]
 
     weights = kernel_variable(name='weights',
-                               shape=kernel_shape,
-                               trainable=trainable)
+                              shape=kernel_shape,
+                              trainable=trainable,
+                              collection=collection)
     biases = bias_variable(name='biases',
-                            shape=[num_features],
-                            trainable=trainable)
+                           shape=[num_features],
+                           trainable=trainable,
+                           collection=collection)
 
     if deconv:
         shape = tf.shape(x)
@@ -59,7 +61,26 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, deconv=Fal
 
     bias = tf.nn.bias_add(conv, biases, name='bias_add')
 
-    return tf.nn.relu(bias, name='activations')
+    if relu:
+        return tf.nn.relu(bias, name='activations')
+    else:
+        return bias
+
+
+def res_layer(x, filter_size=None, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+    if not filter_size:
+        filter_size = (2, 2)
+
+    shape = x.get_shape().as_list()
+    with tf.variable_scope('conv_1'):
+        conv1 = conv_layer(x, filter_size=filter_size, strides=(1, 1),
+                           num_features=shape[-1], trainable=trainable, collection=collection)
+
+    with tf.variable_scope('conv_2'):
+        conv2 = conv_layer(conv1, filter_size=filter_size, strides=(1, 1),
+                           num_features=shape[-1], trainable=trainable, relu=False, collection=collection)
+
+    return tf.add(x, conv2, name='residual')
 
 
 def batch_norm(x, trainable=True):
@@ -92,6 +113,14 @@ def batch_norm(x, trainable=True):
             tf.add_to_collection(ARTNET_BATCHNORM_COLLECTION, variance)
 
         return tf.nn.batch_normalization(x, mean, variance, beta, gamma, BN_EPSILON)
+
+
+def instance_norm(x):
+    epsilon = 1e-9
+
+    mean, var = tf.nn.moments(x, [1, 2], keep_dims=True)
+
+    return tf.div(tf.sub(x, mean), tf.sqrt(tf.add(var, epsilon)))
 
 
 def _get_variable(name, initializer, shape=None, dtype=tf.float32, trainable=True, collection=ARTNET_WEIGHT_COLLECTION):

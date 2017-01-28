@@ -11,7 +11,7 @@ ALPHA = 1e-6
 BETA = 1e-2
 TV_WEIGHT = 1e-2
 
-LEARNING_RATE = 3.0
+LEARNING_RATE = 5.0
 
 
 def feature_matrix(layer):
