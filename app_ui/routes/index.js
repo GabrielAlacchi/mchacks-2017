@@ -1,0 +1,12 @@
+var express = require('express');
+var router = express.Router();
+
+/*acccess controllers*/
+var ctrlMain = require ('../controllers/main');
+
+router.get('/', ctrlMain.index);
+router.get('/about', ctrlMain.about);
+router.get('/examples', ctrlMain.examples);
+router.get('/contact', ctrlMain.contact);
+
+module.exports = router;
