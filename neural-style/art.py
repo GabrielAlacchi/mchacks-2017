@@ -99,22 +99,24 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
         shape = list(gram.shape)
         gram_matrices += [tf.constant(gram.reshape(shape[1:]))]
 
-    image_shape = user_image.shape
-    x = tf.placeholder(dtype=tf.float32, shape=[1] + list(image_shape))
-
-    with tf.variable_scope(vgg_scope, reuse=True):
-        vgg = vgg16(x, reuse=True)
-
     feature_matrices = []
-    for layer in content_layers:
-        layer_op = vgg.get_layer(layer)
-        feature_op = feature_matrix(layer_op)
-        feature = sess.run(feature_op, feed_dict={
-            x: user_image.reshape([1] + list(image_shape))
-        })
+    if len(content_layers) > 0:
 
-        shape = list(feature.shape)
-        feature_matrices += [tf.constant(feature.reshape(shape[1:]))]
+        image_shape = user_image.shape
+        x = tf.placeholder(dtype=tf.float32, shape=[1] + list(image_shape))
+
+        with tf.variable_scope(vgg_scope, reuse=True):
+            vgg = vgg16(x, reuse=True)
+
+        for layer in content_layers:
+            layer_op = vgg.get_layer(layer)
+            feature_op = feature_matrix(layer_op)
+            feature = sess.run(feature_op, feed_dict={
+                x: user_image.reshape([1] + list(image_shape))
+            })
+
+            shape = list(feature.shape)
+            feature_matrices += [tf.constant(feature.reshape(shape[1:]))]
 
     return feature_matrices, gram_matrices
 

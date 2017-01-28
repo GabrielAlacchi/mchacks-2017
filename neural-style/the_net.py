@@ -82,3 +82,8 @@ class TheNet:
             target_variable = filter(lambda var: name in var.name, variables)
             if len(target_variable) > 0:
                 sess.run(target_variable[0].assign(var_dict[name]))
+
+    def init_all_variables(self, sess):
+
+        init_op = tf.variables_initializer(tf.get_collection(THENET_COLLECTION))
+        sess.run(init_op)
