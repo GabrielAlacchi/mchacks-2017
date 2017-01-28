@@ -8,30 +8,28 @@ html
     nav.navbar.navbar-default
       .container-fluid
         .navbar-header
-          a.navbar-brand(href="#") Image-Painter
-        ul.nav.navbar-nav.navbar-right
-          li(class=title=='Image-Painter'?'active':undefined)
-            a(href="/") Home
-          li(class=title=='About'?'active':undefined)
-            a(href="/about") About
-          li(class=title=='Examples'?'active':undefined)
-            a(href="/examples") Examples
-          li(class=title=='Contact'?'active':undefined)
-            a(href="/contact") Contact
+          button.navbar-toggle(type="button", data-toggle="collapse", data-target=".navbar-collapse")
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.navbar-brand(href="/") Image-Painter
+        .collapse.navbar-collapse
+          ul.nav.navbar-nav.navbar-right
+            li(class=title=='Image-Painter'?'active':undefined)
+              a(href="/") Home
+            li(class=title=='About'?'active':undefined)
+              a(href="/about") About
+            li(class=title=='Examples'?'active':undefined)
+              a(href="/examples") Examples
+            li(class=title=='Contact'?'active':undefined)
+              a(href="/contact") Contact
 
     .container
 
       block content
 
-    script(src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous")
-    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
-    script(src="https://www.gstatic.com/firebasejs/3.6.7/firebase.js")
-    script.
-      var config = {
-        apiKey: "AIzaSyDzEpeumcCznN6ICzjLSiRfMCUBfRqF_q0",
-        authDomain: "mchacks-2017.firebaseapp.com",
-        databaseURL: "https://mchacks-2017.firebaseio.com",
-        storageBucket: "mchacks-2017.appspot.com",
-        messagingSenderId: "152582265055"
-        };
-      firebase.initializeApp(config);
+      script(src="https://code.jquery.com/jquery-2.2.4.min.js")
+      script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+
+      block scripts
+        
