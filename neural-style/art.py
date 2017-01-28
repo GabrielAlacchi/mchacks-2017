@@ -9,7 +9,7 @@ from scipy.misc import imread, imresize, imsave
 ALPHA = 1e-8
 BETA = 1e-5
 
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 3.0
 
 
 def feature_matrix(layer):
