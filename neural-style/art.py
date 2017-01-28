@@ -6,8 +6,8 @@ import sys
 
 from scipy.misc import imread, imresize, imsave
 
-ALPHA = 1e-8
-BETA = 1e-5
+ALPHA = 1e-6
+BETA = 1e-2
 
 LEARNING_RATE = 3.0
 
@@ -86,8 +86,13 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
         shape = list(gram.shape)
         gram_matrices += [tf.constant(gram.reshape(shape[1:]))]
 
-    feature_matrices = []
     image_shape = user_image.shape
+    x = tf.placeholder(dtype=tf.float32, shape=[1] + list(image_shape))
+
+    with tf.variable_scope(vgg_scope, reuse=True):
+        vgg = vgg16(x, reuse=True)
+
+    feature_matrices = []
     for layer in content_layers:
         layer_op = vgg.get_layer(layer)
         feature_op = feature_matrix(layer_op)
@@ -103,7 +108,8 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
 def main(argv):
 
-    art_image = imresize(imread('images/starry_night.jpg'), (320, 480))
+    # art_image = imresize(imread('images/starry_night.jpg'), (320, 480))
+    art_image = imread('images/starry_night.jpg')
     user_image = imresize(imread('images/trump.jpg'), (320, 480))
 
     image = tf.Variable(initial_value=np.random.rand(1, 320, 480, 3), dtype=tf.float32, trainable=True, name='output_image')
