@@ -17,7 +17,7 @@ class vgg16:
         with tf.variable_scope('conv1_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 3, 64],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.imgs, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[64], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[64], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv1_1 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -26,7 +26,7 @@ class vgg16:
         with tf.variable_scope('conv1_2', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 64, 64],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv1_1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[64], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[64], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv1_2 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -42,7 +42,7 @@ class vgg16:
         with tf.variable_scope('conv2_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 64, 128],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.pool1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[128], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[128], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv2_1 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -51,7 +51,7 @@ class vgg16:
         with tf.variable_scope('conv2_2', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 128, 128],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv2_1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[128], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[128], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv2_2 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -67,7 +67,7 @@ class vgg16:
         with tf.variable_scope('conv3_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 128, 256],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.pool2, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[256], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[256], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv3_1 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -76,7 +76,7 @@ class vgg16:
         with tf.variable_scope('conv3_2', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 256, 256],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv3_1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[256], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[256], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv3_2 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -85,7 +85,7 @@ class vgg16:
         with tf.variable_scope('conv3_3', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 256, 256],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv3_2, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[256], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[256], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv3_3 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -101,7 +101,7 @@ class vgg16:
         with tf.variable_scope('conv4_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 256, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.pool3, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv4_1 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -110,7 +110,7 @@ class vgg16:
         with tf.variable_scope('conv4_2', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 512, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv4_1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv4_2 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -119,7 +119,7 @@ class vgg16:
         with tf.variable_scope('conv4_3', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 512, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv4_2, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv4_3 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -135,7 +135,7 @@ class vgg16:
         with tf.variable_scope('conv5_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 512, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.pool4, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv5_1 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -144,7 +144,7 @@ class vgg16:
         with tf.variable_scope('conv5_2', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 512, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv5_1, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv5_2 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
@@ -153,7 +153,7 @@ class vgg16:
         with tf.variable_scope('conv5_3', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 512, 512],  trainable=False, collection='VGG_weights')
             conv = tf.nn.conv2d(self.conv5_2, kernel, [1, 1, 1, 1], padding='SAME')
-            biases = bias_variable('biases', shape=[512], collection='VGG_weights')
+            biases = bias_variable('biases', shape=[512], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv5_3 = tf.nn.relu(out, name=scope.name)
             self.parameters += [kernel, biases]
