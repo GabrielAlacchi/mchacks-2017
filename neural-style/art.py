@@ -132,7 +132,7 @@ def main(argv):
         sys.stdout.write('\r Step %i' % step)
 
         sess.run(optimizer)
-        if step % 1 == 0:
+        if step % 50 == 0:
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
             imsave('images/result.png', sess.run(image).reshape((210, 280, 3)))
 
