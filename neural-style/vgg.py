@@ -1,9 +1,18 @@
 
 import tensorflow as tf
 import numpy as np
+import os
+import urllib
 from scipy.misc import imread, imresize
 
 from tf_util import kernel_variable, bias_variable
+
+
+def download_weights_maybe(weight_file):
+    if not os.path.exists(weight_file):
+        print "Downloading weights from https://www.cs.toronto.edu/~frossard/vgg16/vgg16_weights.npz"
+        urllib.urlretrieve("https://www.cs.toronto.edu/~frossard/vgg16/vgg16_weights.npz", weight_file)
+
 
 class vgg16:
     def __init__(self, imgs, reuse=False):

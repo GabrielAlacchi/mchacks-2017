@@ -1,6 +1,6 @@
 
 import tensorflow as tf
-from vgg import vgg16
+from vgg import vgg16, download_weights_maybe
 import numpy as np
 import sys
 
@@ -110,6 +110,7 @@ def main(argv):
 
     with tf.variable_scope('vgg'):
         vgg = vgg16(image, reuse=False)
+        download_weights_maybe('weights/vgg16_weights.npz')
         vgg.load_weights('weights/vgg16_weights.npz', sess)
 
     style_layers = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1']
