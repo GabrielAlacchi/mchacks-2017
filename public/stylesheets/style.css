@@ -24,9 +24,14 @@ div.img:hover {
 div.img img {
   width: 100%;
   height: auto;
+  align: middle;
 }
 
 div.description {
   padding: 15px;
   text-align: center;
+}
+
+.demo-list-three {
+  width: 650px;
 }
