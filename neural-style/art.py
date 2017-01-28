@@ -25,7 +25,16 @@ def feature_matrix(layer):
 
 
 def gram_matrix(feature):
-    return tf.matmul(feature, feature, transpose_b=True)
+
+    shape = tf.shape(feature)
+    n_l = shape[1]
+    m_l = shape[2]
+
+    multiplier = 1.0 / tf.cast(2 * n_l * m_l, dtype=tf.float32)
+    feature_norm = multiplier * feature
+    return tf.matmul(feature_norm, feature, transpose_b=True)
+
+    # return tf.matmul(feature, feature, transpose_b=True)
 
 
 def content_loss(layer, p_l):
@@ -39,14 +48,7 @@ def style_loss(layer, a_l):
 
     g_l = gram_matrix(feature_matrix(layer))
 
-    shape = tf.shape(layer)
-
-    n_l = shape[3]
-    m_l = shape[1] * shape[2]
-
-    multiplier = 1.0 / tf.cast((4 * n_l ** 2 * m_l ** 2), dtype=tf.float32)
-
-    return tf.reduce_mean(multiplier * tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
+    return tf.reduce_mean(tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
 
 
 def total_loss(content_layers, style_layers, feature_matrices, gram_matrices, alpha=ALPHA, beta=BETA):
@@ -101,10 +103,10 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
 def main(argv):
 
-    art_image = imresize(imread('images/starry_night.jpg'), (210, 280))
-    user_image = imresize(imread('images/trump.jpg'), (210, 280))
+    art_image = imresize(imread('images/starry_night.jpg'), (320, 480))
+    user_image = imresize(imread('images/trump.jpg'), (320, 480))
 
-    image = tf.Variable(initial_value=np.random.rand(1, 210, 280, 3), dtype=tf.float32, trainable=True, name='output_image')
+    image = tf.Variable(initial_value=np.random.rand(1, 320, 480, 3), dtype=tf.float32, trainable=True, name='output_image')
 
     sess = tf.Session()
 
@@ -136,10 +138,10 @@ def main(argv):
         sess.run(optimizer)
         if step % 50 == 0:
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
-            imsave('images/result.png', sess.run(image).reshape((210, 280, 3)))
+            imsave('images/result.png', sess.run(image).reshape((320, 480, 3)))
 
     print 'Final Loss: %f' % sess.run(loss)
-    imsave('images/result.png', sess.run(image).reshape((210, 280, 3)))
+    imsave('images/result.png', sess.run(image).reshape((320, 480, 3)))
 
 if __name__ == "__main__":
     main(sys.argv[1:])
