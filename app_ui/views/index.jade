@@ -2,12 +2,15 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  img( src="http://placehold.it/350x300", class="example-image")
+  p
+    
 
-    form
-      input#upload(type="file", name="uploads[]" multiple="multiple")
-      .alert.alert-danger.hidden(role="alert") Please upload a photo.
-      button#upload-btn(type="button") Upload
+  form
+    input#upload(type="file", name="uploads[]" multiple="multiple")
+    .alert.alert-danger.hidden(role="alert") Please upload a photo.
+
+    button#upload-btn(type="button" class="mdl-button mdl-js-button mdl-js-ripple-effect") Upload
 
 block scripts
 
