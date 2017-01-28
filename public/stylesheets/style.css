@@ -1,6 +1,45 @@
 body {
+  text-align: center;
 }
 
 a {
   color: #00B7FF;
 }
+
+p {
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+li {
+  text-align: center;
+}
+
+ul {
+  text-align: center;
+}
+
+div.img {
+  margin: 5px;
+  border: 1px solid #ccc;
+  float: left;
+  width: 350px;
+}
+
+div.img:hover {
+  border: 1px solid #777;
+}
+
+div.img img {
+  width: 100%;
+  height: auto;
+}
+
+div.description {
+  padding: 15px;
+  text-align: center;
+}
+
