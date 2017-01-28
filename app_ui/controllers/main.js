@@ -3,13 +3,13 @@ module.exports.index = function(req, res){
 };
 
 module.exports.about = function(req, res){
-  res.render('about', { title: 'Image-Painter - About' });
+  res.render('about', { title: 'About' });
 };
 
 module.exports.examples = function(req, res){
-  res.render('examples', { title: 'Image-Painter - Examples' });
+  res.render('examples', { title: 'Examples' });
 };
 
 module.exports.contact = function(req, res){
-  res.render('contact', { title: 'Image-Painter - Contact' });
+  res.render('contact', { title: 'Contact' });
 };
