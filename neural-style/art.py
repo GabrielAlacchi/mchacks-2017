@@ -44,7 +44,7 @@ def style_loss(layer, a_l):
     n_l = shape[3]
     m_l = shape[1] * shape[2]
 
-    multiplier = tf.cast((4 * n_l ** 2 * m_l ** 2), dtype=tf.float32) ** -1
+    multiplier = 1.0 / tf.cast((4 * n_l ** 2 * m_l ** 2), dtype=tf.float32)
 
     return tf.reduce_mean(multiplier * tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
 
@@ -53,7 +53,7 @@ def total_loss(content_layers, style_layers, feature_matrices, gram_matrices, al
 
     total_content_loss = tf.constant(0.0, dtype=tf.float32)
     for layer, feature in zip(content_layers, feature_matrices):
-        total_content_loss = total_content_loss + content_loss(layer, p_l=feature_matrices)
+        total_content_loss = total_content_loss + content_loss(layer, p_l=feature)
 
     total_style_loss = tf.constant(0.0, dtype=tf.float32)
     for layer, gram in zip(style_layers, gram_matrices):
@@ -114,7 +114,7 @@ def main(argv):
         vgg.load_weights('weights/vgg16_weights.npz', sess)
 
     style_layers = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1']
-    content_layers = ['conv4_2']
+    content_layers = ['conv3_2', 'conv4_2']
 
     feature_matrices, gram_matrices = precompute(style_layers, content_layers, vgg_scope='vgg', sess=sess, user_image=user_image, art_image=art_image)
 
@@ -138,6 +138,7 @@ def main(argv):
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
             imsave('images/result.png', sess.run(image).reshape((210, 280, 3)))
 
+    print 'Final Loss: %f' % sess.run(loss)
     imsave('images/result.png', sess.run(image).reshape((210, 280, 3)))
 
 if __name__ == "__main__":
