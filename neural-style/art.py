@@ -6,8 +6,8 @@ import sys
 
 from scipy.misc import imread, imresize, imsave
 
-ALPHA = 1e-3
-BETA = 1
+ALPHA = 1e-8
+BETA = 1e-5
 
 LEARNING_RATE = 1e-4
 
@@ -125,7 +125,9 @@ def main(argv):
 
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
 
-    sess.run(tf.global_variables_initializer())
+    global_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+
+    sess.run(tf.variables_initializer(global_vars))
 
     for step in xrange(550):
         sys.stdout.flush()
