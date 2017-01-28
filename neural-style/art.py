@@ -5,9 +5,11 @@ import numpy as np
 import sys
 
 from scipy.misc import imread, imresize, imsave
+from tf_util import tensor_size
 
 ALPHA = 1e-6
 BETA = 1e-2
+TV_WEIGHT = 1e-2
 
 LEARNING_RATE = 3.0
 
@@ -51,7 +53,9 @@ def style_loss(layer, a_l):
     return tf.reduce_mean(tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
 
 
-def total_loss(content_layers, style_layers, feature_matrices, gram_matrices, alpha=ALPHA, beta=BETA):
+def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices, alpha=ALPHA, beta=BETA):
+
+    shape = image.get_shape().as_list()
 
     total_content_loss = tf.constant(0.0, dtype=tf.float32)
     for layer, feature in zip(content_layers, feature_matrices):
@@ -64,7 +68,16 @@ def total_loss(content_layers, style_layers, feature_matrices, gram_matrices, al
     total_content_loss /= len(content_layers)
     total_style_loss /= len(style_layers)
 
-    return total_content_loss * alpha + beta * total_style_loss
+    # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
+    tv_y_size = tensor_size(image[:, 1:, :, :])
+    tv_x_size = tensor_size(image[:, :, 1:, :])
+    tv_loss = TV_WEIGHT * 2 * (
+        (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - 1, :, :]) /
+         tv_y_size) +
+        (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - 1, :]) /
+         tv_x_size))
+
+    return total_content_loss * alpha + beta * total_style_loss + tv_loss
 
 
 def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_image):
@@ -129,7 +142,7 @@ def main(argv):
     content_layer_ops = map(lambda layer: vgg.get_layer(layer), content_layers)
     style_layer_ops = map(lambda layer: vgg.get_layer(layer), style_layers)
 
-    loss = total_loss(content_layer_ops, style_layer_ops, feature_matrices, gram_matrices)
+    loss = total_loss(image, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
 

@@ -109,3 +109,8 @@ def _get_variable(name, initializer, shape=None, dtype=tf.float32, trainable=Tru
                                dtype=dtype,
                                collections=collections,
                                trainable=trainable)
+
+
+def tensor_size(tensor):
+    from operator import mul
+    return reduce(mul, (d.value for d in tensor.get_shape()), 1)
