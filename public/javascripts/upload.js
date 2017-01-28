@@ -17,6 +17,7 @@ $(document).ready(function(){
         contentType: false,
         success: function(data){
           console.log('Upload successful!');
+          $('#imgDisplay').html('<img>' + data + '</img>');
         },
         error: function(req, res, err){
           console.log(err);
