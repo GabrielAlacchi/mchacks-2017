@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  form(action="...", method="post", enctype="multipart/form-data")
+    input#upload(type="file", name="displayImage")
+    button(type="button") Upload
+
+block scripts
+
+  script(src="./javascripts/upload.js")
