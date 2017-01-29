@@ -88,11 +88,6 @@ div.blue{
   padding-top: 0;
 }
 
-div.grey{
-  background-color: #cccccc;
-  width: 100vw;
-}
-
 .btn.btn-primary.btn-large,
 .btn.btn-primary.btn-large:visited{
   border-radius: 0;
