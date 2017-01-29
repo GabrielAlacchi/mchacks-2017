@@ -85,7 +85,7 @@ input#upload{
 div.blue{
   background-color: #b3ffff;
   width: 100vw;
-  padding-top: 30px;
+  padding-top: 0;
 }
 
 div.grey{
@@ -101,7 +101,8 @@ div.grey{
 }
 
 .btn.btn-primary.btn-large, #img-preview{
-  margin: 20px 0 20px 0;
+  margin: 10px 0 10px 0;
+  padding: 20px 0 20px 0;
   box-shadow: 2px 2px #333333;
   color: white;
   font-family: 'Roboto', Helvetica, Arial, sans-serif;
@@ -159,14 +160,16 @@ i.material-icons{
   }
 }
 
-@media (min-width: 992px){
+@media (min-height: 889px){
   .pin{
     position: fixed;
     bottom: 0;
   }
+}
 
-  .btn.btn-primary{
-    height: 334px;
+@media (min-width:1200px){
+    .btn.btn-primary{
+    height: 157px;
   }
 }
 
@@ -236,7 +239,7 @@ div#sample{
 
 p#fileselected, .alert{
   padding: 0;
-  margin: 0;
+  margin: 0 20px 0 20px;
   text-transform: none;
   font-size: 0.5em;
   font-family: Helvetica, sans-serif;

@@ -8,17 +8,18 @@ block content
         span nt
       h3.subtitle Make a simple photo into a true work of art.
     
-  .row.blue.pin 
-    .col-md-10.col-md-offset-1
+  .row.blue.pin
+    .col-md-8.col-md-offset-2
       input#upload(type="file", name="uploads[]" multiple="multiple")
-      .col-md-4#upload
-        button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
-          p#fileselected.text-center
-          .alert.alert-danger#ext.hidden Please upload a JPEG or PNG file.
-          .alert.alert-danger#exist.hidden Please upload a valid file.
-      .col-md-4#upload-submit
-        button#upload-submit.btn.btn-primary.btn-large(type="button") Transform
-      .col-md-4
+      .col-lg-6
+        #upload
+          button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
+            p#fileselected.text-center
+            .alert.alert-danger#ext.hidden Please upload a JPEG or PNG file.
+            .alert.alert-danger#exist.hidden Please upload a valid file.
+        #upload-submit
+          button#upload-submit.btn.btn-primary.btn-large(type="button") Transform
+      .col-lg-6
         #img-preview.btn-primary
           #transformation.form-group
             label(for="sel1") Select List:
