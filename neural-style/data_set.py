@@ -4,6 +4,7 @@ import random
 import argparse
 import sys, glob, cv2
 
+
 def _load_list(image_names, image_dir, net_type):
 
     # TODO: This is where you would perform image resizing
@@ -14,7 +15,7 @@ def _load_list(image_names, image_dir, net_type):
 
 class DataSet:
 
-    def __init__(self, image_names, data_dir, batch_size = 1, net_type ='VGG',image_size=None):
+    def __init__(self, image_names, data_dir,  net_type ='VGG', batch_size = 1,image_size=None):
         # TODO: Implement image_size option so that if provided the images are resized after loaded.
 
         self.image_names = image_names
@@ -24,7 +25,7 @@ class DataSet:
         self.batch_size = batch_size
         self.image_size = image_size
 
-        self.image_dir = self.data_dir#path.join(self.data_dir, 'img')
+        self.image_dir = path.join(self.data_dir, 'img')
         #self.label_dir = path.join(self.data_dir, 'label')
         self.net_type = net_type
 
@@ -88,22 +89,17 @@ def create_data_sets(data_dir, training_reserve=0.7, testing_reserve=0.3, net_ty
     # Get the file name (without extension) of all the jpeg files in the image directory
     image_names = [path.basename(f).replace('.jpg', '') for f in listdir(image_dir) if f.endswith('.jpg')]
 
-    # Filter out those without labels (for whatever reason)
-    image_names = filter(lambda name: path.exists(path.join(label_dir, name + '.txt')), image_names)
-
     # Shuffle up the images
     random.shuffle(image_names)
 
     num_training = int(training_reserve * len(image_names))
     num_testing = int(testing_reserve * len(image_names))
-    num_validation = int(validation_reserve * len(image_names))
 
     i = 0
     training_names = image_names[i:i+num_training]
     i += num_training
     testing_names = image_names[i:i+num_testing]
     i += num_testing
-    validation_names = image_names[i:i+num_validation]
 
     return (DataSet(training_names, data_dir, net_type),
             DataSet(testing_names, data_dir, net_type))
@@ -122,6 +118,7 @@ def resize_bulk(data_dir, img_size):
         im = imresize(im, img_size)
         imsave(image_file, im)
 
+
 def load(path_to_data):
     #takes a string pointing to a location that contains an img folder with raw images, 
     #and a label folder that contains the labels and bounding boxes as text files for each frame
@@ -133,6 +130,7 @@ def load(path_to_data):
         img = load_image(f, False)
         images.append([img])
     return images
+
 
 def load_image(f, flat=False, net_type="VGG"):
     img = cv2.imread(f)
@@ -153,6 +151,7 @@ def load_image(f, flat=False, net_type="VGG"):
         # Set the dimension order to (BATCH, DEPTH, WIDTH, HEIGHT)
     
     return data
+
 
 def main(argv):
     

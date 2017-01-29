@@ -15,13 +15,12 @@ LEARNING_RATE = 5.0
 
 
 def feature_matrix(layer):
-    shape = layer.get_shape().as_list()
+    shape = tf.shape(layer)
+
+    matrix_shape = tf.stack([shape[0], shape[1] * shape[2], shape[3]], axis=0)
 
     # (batch, height, width, depth)
-    if not shape[1]:
-        matrix = tf.reshape(layer, shape=(shape[0], -1, shape[3]))
-    else:
-        matrix = tf.reshape(layer, shape=(-1, shape[1] * shape[2], shape[3]))
+    matrix = tf.reshape(layer, shape=matrix_shape)
 
     return tf.transpose(matrix, perm=(0, 2, 1))
 
@@ -55,7 +54,7 @@ def style_loss(layer, a_l):
 
 def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices, alpha=ALPHA, beta=BETA):
 
-    shape = image.get_shape().as_list()
+    shape = tf.shape(image)
 
     total_content_loss = tf.constant(0.0, dtype=tf.float32)
     for layer, feature in zip(content_layers, feature_matrices):
@@ -72,10 +71,10 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
     tv_y_size = tensor_size(image[:, 1:, :, :])
     tv_x_size = tensor_size(image[:, :, 1:, :])
     tv_loss = TV_WEIGHT * 2 * (
-        (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - 1, :, :]) /
-         tv_y_size) +
-        (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - 1, :]) /
-         tv_x_size))
+        (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
+         tf.cast(tv_y_size, tf.float32)) +
+        (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
+         tf.cast(tv_x_size, tf.float32)))
 
     return total_content_loss * alpha + beta * total_style_loss + tv_loss
 
@@ -123,11 +122,12 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
 def main(argv):
 
-    # art_image = imresize(imread('images/starry_night.jpg'), (320, 480))
     art_image = imread('images/starry_night.jpg')
-    user_image = imresize(imread('images/trump.jpg'), (320, 480))
+    user_image = imread('images/trump.jpg')
 
-    image = tf.Variable(initial_value=np.random.rand(1, 320, 480, 3), dtype=tf.float32, trainable=True, name='output_image')
+    image_shape = user_image.shape
+
+    image = tf.Variable(initial_value=np.random.rand(1, image_shape[0], image_shape[1], image_shape[2]), dtype=tf.float32, trainable=True, name='output_image')
 
     sess = tf.Session()
 
@@ -159,10 +159,10 @@ def main(argv):
         sess.run(optimizer)
         if step % 50 == 0:
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
-            imsave('images/result.png', sess.run(image).reshape((320, 480, 3)))
+            imsave('images/result.png', sess.run(image).reshape(image_shape))
 
     print 'Final Loss: %f' % sess.run(loss)
-    imsave('images/result.png', sess.run(image).reshape((320, 480, 3)))
+    imsave('images/result.png', sess.run(image).reshape(image_shape))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

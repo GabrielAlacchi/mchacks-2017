@@ -141,5 +141,5 @@ def _get_variable(name, initializer, shape=None, dtype=tf.float32, trainable=Tru
 
 
 def tensor_size(tensor):
-    from operator import mul
-    return reduce(mul, (d.value for d in tensor.get_shape()), 1)
+    shape = tf.shape(tensor)
+    return shape[0] * shape[1] * shape[2] * shape[3]

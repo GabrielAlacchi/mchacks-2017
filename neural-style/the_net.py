@@ -71,7 +71,7 @@ class TheNet:
 
         np.savez(weight_file, **var_dict)
 
-    def load_model(self, weight_file, sess):
+    def load_model(self, weight_file, sess, base_scope=''):
 
         variables = tf.get_collection(THENET_COLLECTION)
 
@@ -79,7 +79,11 @@ class TheNet:
 
         for name in var_dict.keys():
 
-            target_variable = filter(lambda var: name in var.name, variables)
+            if base_scope:
+                target_variable = filter(lambda var: name in var.name and var.name.startswith(base_scope), variables)
+            else:
+                target_variable = filter(lambda var: name in var.name, variables)
+
             if len(target_variable) > 0:
                 sess.run(target_variable[0].assign(var_dict[name]))
 
