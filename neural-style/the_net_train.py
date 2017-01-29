@@ -8,7 +8,7 @@ import art
 from vgg import vgg16
 from scipy.misc import imread
 
-BATCH_SIZE = 3
+BATCH_SIZE = 25
 EPOCHS = 1
 LEARNING_RATE = 1e-3
 
@@ -47,6 +47,8 @@ def main(argv):
     train_step = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
 
     training, testing = create_data_sets('data')
+    training.set_batch_size(BATCH_SIZE)
+    testing.set_batch_size(BATCH_SIZE)
 
     num_steps_per_epoch = training.get_epoch_steps()
     epochs_to_train = EPOCHS
