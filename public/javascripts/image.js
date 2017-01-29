@@ -13,7 +13,7 @@ function getParameterByName(name, url) {
 
 $(function() {
 
-  var db = firebase.database()
+  var db = firebase.database();
   var uploadKey = getParameterByName('key');
 
   db.ref('/uploads/' + uploadKey).on('value', function(snapshot) {

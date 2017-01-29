@@ -8,28 +8,23 @@ block content
     
   .row#blue
     .col-md-8.col-md-offset-2
-      .row
+      .col-sm-4
         i.material-icons backup
-      .row
+      .col-sm-8
         input#upload(type="file", name="uploads[]" multiple="multiple")
         button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
-        button#upload-submit.btn.btn-primary.btn-large(type="button") Upload
-        .alert.alert-danger.hidden(role="alert") Please upload a photo.
+        button#upload-submit.btn.btn-primary.btn-large(type="button") Transform
+        .col-md-6
+          p#fileselected.text-center
+        .col-md-6
+          #transformation.form-group
+            label(for="sel1") Select List:
+            select.form-control#sel1
+              option Starry Night
+              option Scream
+              option Mona Lisa
+              option The Great Wave
 
-  button.btn.btn-primary#imageToggle.hidden(type="button", data-toggle="modal", data-target="#imageDisplay") Launch Modal
-
-  #imageDisplay.modal.fade(tabindex="-1", role="dialog", aria-labelledby="converted image")
-    .modal-dialog(role="document")
-      .modal-content
-        .modal-header
-          h3.nospacing Your Converted Picture
-          button.close(type="button", data-dismiss="modal", aria-label="close")
-            span(aria-hidden="true") &times;
-        .modal-body
-          img#convertedImage
-        .modal-footer
-          button.btn.btn-secondary(type="button" data-dismiss="modal") Close
-          button.btn.btn-primary(type="button") Download
 
 block scripts
 

@@ -7,6 +7,11 @@ $(document).ready(function(){
     $('#upload').click();
   });
 
+  $('#upload').on('change', function(e){
+    $('#fileselected').html('');
+    $('#fileselected').html($('#upload').prop("files")[0]['name']);
+  });
+
   $('#upload-submit').on('click', function() {
     var fileElement = document.getElementById('upload');
     var file = fileElement.files[0];

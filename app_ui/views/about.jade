@@ -2,16 +2,19 @@ extends layout
 
 block content
   .row
-    .col-md-8.col-md-offset-2
-      h2= title
-      p Have you ever wondered what you would look like as a Picasso painting? Or what a "Starry Night Trump" would look like?
-      p.bold Well wonder no more!
-      p Using the technique of 
-        span.italic style transfer
-        span , we apply machine learning to generate horribly awesome pictures from your very own.
+    .col-md-10.col-md-offset-1
+      .col-md-5
+        img.img-responsive(src="https://uploads4.wikiart.org/images/m-c-escher/drawing-hands.jpg!Large.jpg")
+      .col-md-7
+        h2.no-top= title
+        p Have you ever wondered what you would look like as a Picasso painting? Or what a "Starry Night Trump" would look like?
+        p.bold Well wonder no more!
+        p Using the technique of 
+          span.italic style transfer
+          span , we apply machine learning to generate horribly awesome pictures from your very own.
 
   .row#grey
-    .col-md-8.col-md-offset-2
+    .col-md-10.col-md-offset-1
       p Some explanation behind the buzzwords you might have been hearing...
       p.italic Machine Learning
       p Born from artificial intelligence, machine learning means creating algorithms that find patterns in data, which can then be used to analyze new data.

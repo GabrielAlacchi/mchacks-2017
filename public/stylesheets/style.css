@@ -11,7 +11,7 @@ h1, h2, nav{
 }
 
 h1{
-  padding: 50px 40px 0px 40px;
+  padding: 40px 40px 0px 40px;
   text-align: left;
   font-size: 6.5em;
 }
@@ -23,6 +23,7 @@ h2{
 p{
   font-size: 1.5em;
   margin-bottom: 15px;
+  text-align: left;
 }
 
 .italic{
@@ -86,8 +87,6 @@ input#upload{
 
 #grey{
   background-color: #cccccc;
-  position: fixed;
-  bottom: 0;
   width: 100vw;
 }
 
@@ -105,6 +104,11 @@ input#upload{
 i.material-icons{
   font-size: 10em;
   color: #4d4d4d;
+  top: 50%;
+}
+
+.row > div{
+  padding: 20px;
 }
 
 @media(max-width: 767px){
@@ -112,6 +116,10 @@ i.material-icons{
   .navbar-default .navbar-nav > li.active > a:hover,
   .navbar-default .navbar-nav > li.active > a:visited{
     background-color: #999999;
+  }
+
+  h1{
+    padding-top: 0px;
   }
 }
 
@@ -143,6 +151,10 @@ i.material-icons{
   padding-bottom: 0px;
 }
 
+.no-top{
+  margin-top: 0px;
+}
+
 .img-circle {
   margin-left: auto;
   margin-right: auto;
@@ -165,5 +177,9 @@ h3.nospacing{
 }
 
 .row#vertcenter{
-  margin-top: 20vh;
+  margin-top: 15vh;
+}
+
+.row#vertcenter > div > div {
+  padding: 60px 20px 60px 20px;
 }
