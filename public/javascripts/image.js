@@ -24,7 +24,8 @@ $(function() {
     }
     if (val.completionUrl) {
       $('#filtered').attr('src', val.completionUrl);
+      $('#download').attr('href', val.completionUrl);
     }
 
-  });
+  }); 
 });

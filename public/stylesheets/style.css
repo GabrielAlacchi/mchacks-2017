@@ -106,6 +106,10 @@ div.blue{
   letter-spacing: 1.5px;
 }
 
+a#download > .btn{
+  height: 100px;
+}
+
 #img-preview{
   padding: 30px;
 }
@@ -244,4 +248,8 @@ p#fileselected, .alert{
 
 .hidden{
   display:;
+}
+
+.left{
+  padding-left: 40px;
 }
