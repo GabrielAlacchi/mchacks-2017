@@ -38,3 +38,7 @@ jspm_packages
 
 #API keys
 public/config.js
+.idea
+
+*.pyc
+*.py~
