@@ -1,5 +1,6 @@
 
 from the_net import TheNet
+from unet import UNet
 import tensorflow as tf
 import numpy as np
 import sys
@@ -8,6 +9,8 @@ import art
 from vgg import vgg16
 import cv2
 
+import argparse
+
 BATCH_SIZE = 25
 EPOCHS = 1
 LEARNING_RATE = 1e-3
@@ -15,11 +18,33 @@ LEARNING_RATE = 1e-3
 
 def main(argv):
 
-    art_image = cv2.imread('images/starry_night.jpg')
+    argparser = argparse.ArgumentParser(prog='Training script')
+    argparser.add_argument('-m', '--model', default='thenet',
+                           dest='model',
+                           help='Model to use for training, options: thenet, unet')
+    argparser.add_argument('-a', '--art-image', default='images/starry_night.jpg',
+                           dest='art_image',
+                           help='Art image to train on')
+    argparser.add_argument('-s', '--save-dest', default='weights/starry_night.npz',
+                           dest='save_dest',
+                           help='Save destination')
+    argparser.add_argument('-e', '--epochs', default=EPOCHS, type=int,
+                           dest='epochs',
+                           help='Number of epochs to train')
+    argparser.add_argument('-l', '--learning-rate', default=LEARNING_RATE, type=float,
+                           dest='learning_rate',
+                           help='Learning rate to train with')
+
+    args = argparser.parse_args(argv)
+
+    art_image = cv2.imread(args.art_image)
 
     sess = tf.Session()
 
-    thenet = TheNet()
+    if args.model == 'thenet':
+        thenet = TheNet()
+    else:
+        thenet = UNet()
 
     image_pl = tf.placeholder(dtype=tf.float32, shape=(BATCH_SIZE, 224, 224, 3))
 
@@ -44,7 +69,7 @@ def main(argv):
 
     loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices)
 
-    train_step = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
+    train_step = tf.train.AdamOptimizer(learning_rate=args.learning_rate).minimize(loss)
 
     sess.run(tf.global_variables_initializer())
 
@@ -53,7 +78,7 @@ def main(argv):
     testing.set_batch_size(BATCH_SIZE)
 
     num_steps_per_epoch = training.get_epoch_steps()
-    epochs_to_train = EPOCHS
+    epochs_to_train = args.epochs
     reporting_step = 100
 
     print "Running %d epochs with %d training steps per epoch" % (epochs_to_train, num_steps_per_epoch)
