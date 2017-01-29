@@ -46,6 +46,8 @@ def main(argv):
 
     train_step = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
 
+    sess.run(tf.global_variables_initializer())
+
     training, testing = create_data_sets('data')
     training.set_batch_size(BATCH_SIZE)
     testing.set_batch_size(BATCH_SIZE)
