@@ -76,7 +76,7 @@ def main(argv):
 
     sess.run(tf.global_variables_initializer())
 
-    training, testing = create_data_sets('data')
+    training, testing = create_data_sets('data', training_reserve=0.3, testing_reserve=0.7)
     training.set_batch_size(args.batch_size)
     testing.set_batch_size(args.batch_size)
 
