@@ -18,7 +18,7 @@ var config = {
 firebase.initializeApp(config);
 
 var routes = require('./app_ui/routes/index');
-var routesApi = require('./app_api/routes');
+var routesApi = require('./app_api/routes')(firebase);
 var users = require('./app_ui/routes/users');
 
 var app = express();

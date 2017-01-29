@@ -1,28 +1,33 @@
 var express = require('express');
 var router = express.Router();
-var formidable = require('formidable');
 var util = require('util');
-var PythonShell = require('python-shell');
-//var pyshell = new PythonShell('INSERT PYTHON SCRIPT.py');
 
-router.post('/upload', function(req, res){
-  var form = new formidable.IncomingForm();
+module.exports = function(firebase) {
 
-  form.uploadDir = './uploads';
+  var db = firebase.database();
+  var storage = firebase.storage()
 
-  form.parse(req, function(err, fields, files){
-    res.writeHead(200, {'content-type': 'text/plain'});
-    res.write('recieved upload: \n\n');
-    res.end(util.inspect({fields: fields, files: files}));
+  router.post('/upload', function(req, res){
+    var uploadDetails = req.body;
+
+    var storagePath = '/' + uploadDetails.fileKey + '/' + uploadDetails.fileName;
+    var ref = storage.ref(storagePath).getDownloadURL().then(function (url) {
+
+      request({
+        uri: 'localhost:8000',
+        method: 'POST',
+        timeout: 20000,
+        json: true,
+        body: {
+          image_url: url,
+          model: 'starry_night'
+        }
+      })
+
+    })
+
+
   });
 
-  //pyshell.send(INSERT FILE);
-
-  /*pyshell.on(RECEIVED IMAGE, function(image)){
-    res.sendFile(image);
-  };*/
-
-  return;
-});
-
-module.exports = router;
+  return router;
+};
