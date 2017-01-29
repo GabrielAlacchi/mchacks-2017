@@ -105,18 +105,24 @@ def create_data_sets(data_dir, training_reserve=0.7, testing_reserve=0.3, net_ty
             DataSet(testing_names, data_dir, net_type))
 
 
-def resize_bulk(data_dir, img_size):
+def resize_bulk(data_dir):
     image_dir = path.join(data_dir, 'img')
     files = listdir(image_dir)
-
-    from scipy.misc import imread, imsave, imresize
 
     for image_file in files:
         print "Resizing %s" % path.basename(image_file)
         image_file = path.join(data_dir, 'img', image_file)
-        im = imread(image_file, mode='RGB')
-        im = imresize(im, img_size)
-        imsave(image_file, im)
+        im = cv2.imread(image_file)
+
+        shape = im.shape
+
+        left_point = int(shape[0] / 2 - 224 / 2)
+        right_point = int(shape[0] / 2 + 224 / 2)
+        top_point = int(shape[1] / 2 - 224 / 2)
+        bottom_point = int(shape[1] / 2 + 224 / 2)
+        im = im[left_point:right_point, top_point:bottom_point]
+
+        cv2.imwrite(image_file, im)
 
 
 def load(path_to_data):
