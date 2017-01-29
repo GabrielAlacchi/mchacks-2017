@@ -1,37 +1,101 @@
-body, p, h1, li, ul {
+body{
   text-align: center;
+  height: 100vh;
 }
 
-a {
-  color: #00B7FF;
+h1, h2, nav{
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1.5px;
 }
 
-.hidden{
-  view: none;
+h1{
+  padding: 50px 40px 0px 40px;
+  text-align: left;
+  font-size: 5.5em;
 }
 
-div.img {
-  margin: 5px;
-  border: 1px solid #ccc;
-  float: left;
-  width: 350px;
+h3.subtitle{
+  text-align: left;
+  padding-left: 40px;
+  font-size: 2em;
 }
 
-div.img:hover {
-  border: 1px solid #777;
+nav.navbar.navbar-default{
+  background-color: #4d4d4d;
+  border-color: transparent;
 }
 
-div.img img {
-  width: 100%;
-  height: auto;
-  align: middle;
+button.navbar-toggle{
+  background-color: #ddd;
 }
 
-div.description {
-  padding: 15px;
-  text-align: center;
+.navbar-default div.navbar-collapse
+{
+    border-top:none;
+    box-shadow:none;
 }
 
-.demo-list-three {
-  width: 650px;
+.navbar-default .navbar-brand, .nav.navbar-nav.navbar-right li a,
+.navbar-default .navbar-brand, .nav.navbar-nav.navbar-right li a:visited{
+  color: #eeeeee;
+}
+
+.navbar-default .navbar-nav > li.active > a, 
+.navbar-default .navbar-nav > li.active > a:hover,
+.navbar-default .navbar-nav > li.active > a:visited{
+  background-color: #4d4d4d;
+  border-bottom: 5px solid #00ffff;
+  margin-bottom: -5px;
+  padding-bottom: 10px;
+}
+
+.navbar-default .navbar-brand:hover, .nav.navbar-nav.navbar-right li a:hover {
+  color: #cccccc;
+}
+
+div.container{
+  margin-top: -102px;  
+  height: 100%;
+}
+
+input#upload{
+  display: none;
+}
+
+#submission{
+  background-color: #b3ffff;
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+}
+
+.btn.btn-primary.btn-large{
+  border-radius: 0;
+  padding: 30px;
+  margin: 0 20px 40px 20px;
+  font-size: 2em;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  box-shadow: 2px 2px #333333;
+}
+
+i.material-icons{
+  font-size: 10em;
+  color: grey;
+}
+
+@media (min-width: 768px){
+  .navbar{
+    min-height: 50px;
+  }
+
+  .navbar-nav > li > a{
+    line-height: 50px;
+  }
+
+  div.row{
+    padding: 30px;
+  }
 }

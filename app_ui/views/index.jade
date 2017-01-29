@@ -1,16 +1,20 @@
 extends layout
 
 block content
-  h1= title
-  img( src="http://placehold.it/350x300", class="example-image")
-  p
+  .row#title
+    .col-md-8.col-md-offset-2
+      h1= title
+      h3.subtitle Make a simple photo into a true work of art.
     
-
-  form
-    input#upload(type="file", name="uploads[]" multiple="multiple")
-    .alert.alert-danger.hidden(role="alert") Please upload a photo.
-
-    button#upload-btn(type="button" class="mdl-button mdl-js-button mdl-js-ripple-effect") Upload
+  .row#submission
+    .col-md-8.col-md-offset-2
+      .row
+        i.material-icons backup
+      .row
+        input#upload(type="file", name="uploads[]" multiple="multiple")
+        button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
+        button#upload-submit.btn.btn-primary.btn-large(type="button") Upload
+        .alert.alert-danger.hidden(role="alert") Please upload a photo.
 
 block scripts
 

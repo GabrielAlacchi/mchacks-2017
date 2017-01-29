@@ -1,5 +1,9 @@
 $(document).ready(function(){
   $('#upload-btn').on('click', function(){
+    $('#upload').click();
+  });
+
+  $('#upload-submit').on('click', function(){
     var files = $('#upload').get(0).files;
 
     if (files.length > 0){
