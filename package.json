@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www.js"
+    "start": "node ./bin/www.js",
+    "prod": "sudo bash -c \"PORT=80 NODE_ENV='production' npm start\""
   },
   "dependencies": {
     "body-parser": "~1.0.0",
