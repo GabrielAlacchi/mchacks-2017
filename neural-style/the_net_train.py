@@ -6,7 +6,7 @@ import sys
 from data_set import create_data_sets
 import art
 from vgg import vgg16
-from scipy.misc import imread
+import cv2
 
 BATCH_SIZE = 25
 EPOCHS = 1
@@ -15,7 +15,7 @@ LEARNING_RATE = 1e-3
 
 def main(argv):
 
-    art_image = imread('images/starry_night.jpg')
+    art_image = cv2.imread('images/starry_night.jpg')
 
     sess = tf.Session()
 

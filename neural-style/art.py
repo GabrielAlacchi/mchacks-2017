@@ -4,10 +4,10 @@ from vgg import vgg16, download_weights_maybe
 import numpy as np
 import sys
 
-from scipy.misc import imread, imresize, imsave
+import cv2
 from tf_util import tensor_size
 
-ALPHA = 1e-7
+ALPHA = 1e-6
 BETA = 1e-2
 TV_WEIGHT = 1e-2
 
@@ -122,8 +122,8 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
 def main(argv):
 
-    art_image = imread('images/starry_night.jpg')
-    user_image = imread('images/trump.jpg')
+    art_image = cv2.imread('images/starry_night.jpg')
+    user_image = cv2.imread('images/trump.jpg')
 
     image_shape = user_image.shape
 
@@ -159,10 +159,10 @@ def main(argv):
         sess.run(optimizer)
         if step % 50 == 0:
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
-            imsave('images/result.png', sess.run(image).reshape(image_shape))
+            cv2.imwrite('images/result.png', sess.run(image).reshape(image_shape))
 
     print 'Final Loss: %f' % sess.run(loss)
-    imsave('images/result.png', sess.run(image).reshape(image_shape))
+    cv2.imwrite('images/result.png', sess.run(image).reshape(image_shape))
 
 if __name__ == "__main__":
     main(sys.argv[1:])

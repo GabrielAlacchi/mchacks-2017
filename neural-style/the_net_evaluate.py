@@ -4,7 +4,7 @@ from the_net import TheNet
 from os import path
 import argparse
 import sys
-import json
+import simplejson as json
 import cv2
 
 from BaseHTTPServer import BaseHTTPRequestHandler
