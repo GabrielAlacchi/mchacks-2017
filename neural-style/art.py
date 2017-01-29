@@ -7,7 +7,7 @@ import sys
 from scipy.misc import imread, imresize, imsave
 from tf_util import tensor_size
 
-ALPHA = 1e-6
+ALPHA = 1e-7
 BETA = 1e-2
 TV_WEIGHT = 1e-2
 
