@@ -5,7 +5,6 @@ body{
 
 h1, h2, nav{
   font-family: 'Roboto', Helvetica, Arial, sans-serif;
-  text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 1.5px;
 }
@@ -14,6 +13,10 @@ h1{
   padding: 40px 40px 0px 40px;
   text-align: left;
   font-size: 6.5em;
+}
+
+h2, nav{ 
+  text-transform: uppercase;
 }
 
 h2{
@@ -80,8 +83,6 @@ input#upload{
 
 #blue{
   background-color: #b3ffff;
-  position: fixed;
-  bottom: 0;
   width: 100vw;
 }
 
@@ -144,7 +145,13 @@ i.material-icons{
     margin-bottom: -5px;
     padding-bottom: 10px;
   }
+}
 
+@media (min-width: 899px){
+  #blue{
+    position: fixed;
+    bottom: 0;
+  }
 }
 
 .no-bottom{
@@ -186,4 +193,26 @@ h3.nospacing{
 
 .image {
   max-width: 100%;
+}
+
+.red{
+  color: red;
+}
+
+div#sample{
+  height: 200px;
+}
+
+#fileselected{
+  padding-top: 27px;
+}
+
+.no-gutter{
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.img-responsive{
+  margin-left: auto;
+  margin-right: auto;
 }

@@ -10,22 +10,26 @@ var models = {
   'Udnie': 'udnie'
 };
 
+var selectedModel;
+
 $(document).ready(function(){
   $('#upload-btn').on('click', function(){
     $('#upload').click();
   });
 
   $('#upload').on('change', function(e){
-    $('#fileselected').html('');
     $('#fileselected').html($('#upload').prop("files")[0]['name']);
+  });
+
+  $('#sel1').on('change', function(){
+    selectedModel = models[$('#sel1 option:selected').text()];
+    $('#sample').html('<img class="img-responsive" src=./images/'+selectedModel+'.jpg>');
   });
 
   $('#upload-submit').on('click', function() {
     var fileElement = document.getElementById('upload');
     var file = fileElement.files[0];
     var extension = file.name.split('.')[1];
-
-    var selectedModel = models[$('#sel1 option:selected').text()];
 
     var formData = new FormData();
     formData.append('file', file);

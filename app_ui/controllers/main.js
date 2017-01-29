@@ -1,5 +1,5 @@
 module.exports.index = function(req, res){
-  res.render('index', { title: 'Image-Painter' });
+  res.render('index', { title: 'pAInt' });
 };
 
 module.exports.about = function(req, res){
