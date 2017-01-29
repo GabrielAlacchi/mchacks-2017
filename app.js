@@ -26,7 +26,7 @@ firebase.initializeApp(config);
 app.set('views', path.join(__dirname, 'app_ui', 'views'));
 app.set('view engine', 'jade');
 
-app.use(favicon());
+app.use(favicon(__dirname + '/public/favicon.png'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());

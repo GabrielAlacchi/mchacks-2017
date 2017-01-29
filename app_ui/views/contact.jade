@@ -1,15 +1,29 @@
 extends layout
 
 block content
-  h1= title
-  p 
-    ul(class="demo-list-three mdl-list")
-      li
-        a(href="https://github.com/GabrielAlacchi") Gabriel Alacchi
-      li
-        a(href="https://github.com/rfratila") Robert Fratila
-      li
-        a(href="https://github.com/DavidLi-Minxiao") David Li
-      li
-        a(href="https://github.com/aywscott") Alice Scott
-   
+  .row
+    .col-md-8.col-md-offset-2
+      h2= title
+
+  .row
+    .col-md-10.col-md-offset-1
+      .col-lg-3.col-md-6
+        a(href="https://github.com/GabrielAlacchi")
+          img.img-circle.img-responsive(src="./images/gabriel.jpg") 
+          p Gabriel Alacchi
+          p.small "Don't ask me how this works, but it works."
+      .col-lg-3.col-md-6
+        a(href="https://github.com/rfratila")
+          img.img-circle.img-responsive(src="./images/robert.jpg")
+          p Robert Fratila
+          p.small "You gotta pull first before you push."
+      .col-lg-3.col-md-6
+        a(href="https://github.com/DavidLi-Minxiao")
+          img.img-circle.img-responsive(src="./images/david.jpg")
+          p David Li
+          p.small "I thought this was COMP 202."
+      .col-lg-3.col-md-6
+        a(href="https://github.com/aywscott") 
+          img.img-circle.img-responsive(src="./images/alice.jpg")
+          p Alice Scott
+          p.small "How do you exit Vim???"

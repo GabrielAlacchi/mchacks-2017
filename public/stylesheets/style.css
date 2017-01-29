@@ -13,7 +13,24 @@ h1, h2, nav{
 h1{
   padding: 50px 40px 0px 40px;
   text-align: left;
-  font-size: 5.5em;
+  font-size: 6.5em;
+}
+
+h2{
+  font-size: 4em;
+}
+
+p{
+  font-size: 1.5em;
+  margin-bottom: 15px;
+}
+
+.italic{
+  font-style: italic;
+}
+
+.bold{
+  font-weight: bold;
 }
 
 h3.subtitle{
@@ -42,15 +59,6 @@ button.navbar-toggle{
   color: #eeeeee;
 }
 
-.navbar-default .navbar-nav > li.active > a, 
-.navbar-default .navbar-nav > li.active > a:hover,
-.navbar-default .navbar-nav > li.active > a:visited{
-  background-color: #4d4d4d;
-  border-bottom: 5px solid #00ffff;
-  margin-bottom: -5px;
-  padding-bottom: 10px;
-}
-
 .navbar-default .navbar-brand:hover, .nav.navbar-nav.navbar-right li a:hover {
   color: #cccccc;
 }
@@ -64,8 +72,20 @@ input#upload{
   display: none;
 }
 
-#submission{
+.description{
+  padding-bottom: 10px;
+  font-size: 1.5em;
+}
+
+#blue{
   background-color: #b3ffff;
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+}
+
+#grey{
+  background-color: #cccccc;
   position: fixed;
   bottom: 0;
   width: 100vw;
@@ -83,7 +103,15 @@ input#upload{
 
 i.material-icons{
   font-size: 10em;
-  color: grey;
+  color: #4d4d4d;
+}
+
+@media(max-width: 767px){
+  .navbar-default .navbar-nav > li.active > a, 
+  .navbar-default .navbar-nav > li.active > a:hover,
+  .navbar-default .navbar-nav > li.active > a:visited{
+    background-color: #999999;
+  }
 }
 
 @media (min-width: 768px){
@@ -95,7 +123,37 @@ i.material-icons{
     line-height: 50px;
   }
 
-  div.row{
+  .row{
     padding: 30px;
   }
+
+  .navbar-default .navbar-nav > li.active > a, 
+  .navbar-default .navbar-nav > li.active > a:hover,
+  .navbar-default .navbar-nav > li.active > a:visited{
+    background-color: #4d4d4d;
+    border-bottom: 5px solid #00ffff;
+    margin-bottom: -5px;
+    padding-bottom: 10px;
+  }
+
+}
+
+.no-bottom{
+  padding-bottom: 0px;
+}
+
+.img-circle {
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 50%;
+  border: solid 15px grey;
+  margin-bottom: 20px;
+}
+
+a > p {
+  font-size: 2em;
+}
+
+a > p.small{
+  font-size: 1.25em;
 }
