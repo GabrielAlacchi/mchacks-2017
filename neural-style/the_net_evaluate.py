@@ -2,6 +2,7 @@
 import tensorflow as tf
 from the_net import TheNet
 from os import path
+import os
 import argparse
 import sys
 import simplejson as json
@@ -42,7 +43,12 @@ def consume_model(image, sess, model_name):
         x: image.reshape(batch_shape)
     })
 
-    return transformed_image.reshape(image.shape)
+    transformed_image = transformed_image.reshape(list(transformed_image.shape)[1:])
+
+    if transformed_image.shape[0] != batch_shape[1] or transformed_image.shape[1] != batch_shape[2]:
+        transformed_image = cv2.resize(transformed_image, (batch_shape[2], batch_shape[1]))
+
+    return transformed_image
 
 
 # Create custom HTTPRequestHandler class
@@ -56,18 +62,16 @@ class TheNetHTTPRequestHandler(BaseHTTPRequestHandler):
             post_body = self.rfile.read(content_len)
             body_obj = decoder.decode(post_body)
 
-            image_path = body_obj['image_file_path']
-            models = body_obj['models']
+            image_path = body_obj['image_path']
+            model_name = body_obj['model']
 
             image = cv2.imread(image_path)
 
-            result_images = []
-            for model_name in models:
-                transformed = consume_model(image, sess, model_name)
-                image_words = image_path.split('.')
-                transform_path = '%s_%s.%s' % (image_words[0], model_name, image_words[1])
-                result_images += [transform_path]
-                cv2.imwrite(transform_path, transformed)
+            transformed = consume_model(image, sess, model_name)
+            image_words = image_path.split('.')
+            transform_path = '%s_%s.%s' % (image_words[0], model_name, image_words[1])
+            result_image = transform_path
+            cv2.imwrite(transform_path, transformed)
 
             # send code 200 response
             self.send_response(200)
@@ -78,7 +82,7 @@ class TheNetHTTPRequestHandler(BaseHTTPRequestHandler):
 
             # send file content to client
             json_obj = {
-                "result_images": result_images
+                "result_image": result_image
             }
 
             self.wfile.write(json.dumps(json_obj))

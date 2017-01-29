@@ -10,39 +10,34 @@ $(document).ready(function(){
   $('#upload-submit').on('click', function() {
     var fileElement = document.getElementById('upload');
     var file = fileElement.files[0];
+    var extension = file.name.split('.')[1];
 
-    var fileKey = db.ref('/uploads').push().key;
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('extension', extension);
 
-    var storageRef = storage.ref('/' + fileKey + '/' + file.name);
+    var request = new XMLHttpRequest();
+    request.open("POST", "/api/upload/");
 
-    var task = storageRef.put(file);
+    request.onreadystatechange = function() {
+      if (request.readyState = XMLHttpRequest.DONE) {
+        var response = JSON.parse(request.responseText);
 
-    task.on('state_changed',
-      function progress(snapshot) {
-
-      },
-      function error(err) {
-
-      },
-      function complete() {
-        db.ref('/uploads/' + fileKey).set({
-          filename: file.name
-        });
-        $.ajax({
-          url: '/api/upload',
-          type: 'POST',
-          contentType: 'application/json',
-          data: {
-            fileKey: fileKey,
-            fileName: file.name
-          },
-          success: function() {
-            console.log('Upload successful!');
+        var first = true;
+        db.ref('/uploads/' + response.fileKey).on('value', function(snapshot) {
+          var val = snapshot.val();
+          if (val.completionUrl && first) {
             $('#imageToggle').click();
+            $('#convertedImage').html('<img src="' + snapshot.completion_url + '">');
+            first = false;
           }
         })
       }
-    )
+    };
+
+
+    request.send(formData);
+
 
   });
 

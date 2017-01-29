@@ -8,17 +8,17 @@ var firebase = require('firebase');
 var config = require('./config');
 
 //firebase
-var config = {
+var conf = {
     apiKey: config.firebaseKey,
     authDomain: "mchacks-2017.firebaseapp.com",
     databaseURL: "https://mchacks-2017.firebaseio.com",
     storageBucket: "mchacks-2017.appspot.com",
     messagingSenderId: "152582265055"
 };
-firebase.initializeApp(config);
+firebase.initializeApp(conf);
 
 var routes = require('./app_ui/routes/index');
-var routesApi = require('./app_api/routes')(firebase);
+var routesApi = require('./app_api/routes')(firebase, path.join(__dirname, 'public', 'uploaded'));
 var users = require('./app_ui/routes/users');
 
 var app = express();

@@ -1,31 +1,53 @@
 var express = require('express');
 var router = express.Router();
 var util = require('util');
+var fs = require('fs');
+var path = require('path');
+var formidable = require('formidable');
+var request = require('request');
 
-module.exports = function(firebase) {
+module.exports = function(firebase, uploadDir) {
 
   var db = firebase.database();
-  var storage = firebase.storage()
 
   router.post('/upload', function(req, res){
-    var uploadDetails = req.body;
 
-    var storagePath = '/' + uploadDetails.fileKey + '/' + uploadDetails.fileName;
-    var ref = storage.ref(storagePath).getDownloadURL().then(function (url) {
+    var form = new formidable.IncomingForm();
 
-      request({
-        uri: 'localhost:8000',
-        method: 'POST',
-        timeout: 20000,
-        json: true,
-        body: {
-          image_url: url,
-          model: 'starry_night'
-        }
-      })
+    form.uploadDir = uploadDir;
 
-    })
+    form.parse(req, function(err, fields, files) {
 
+      var ext = fields.extension;
+      var file = files.file.path;
+
+      var final_path = file + '.' + ext;
+      fs.rename(file, final_path, function(err) {
+        var fileKey = db.ref('/uploads').push({
+          fileUrl: path.join('/uploaded', path.basename(final_path))
+        }).key;
+
+        res.json({
+          fileKey: fileKey
+        });
+
+        request({
+          uri: 'http://localhost:8000/',
+          method: 'POST',
+          json: {
+            image_path: final_path,
+            model: 'starry_night'
+          }
+        }, function(err, res) {
+          db.ref('/uploads/' + fileKey).set({
+            fileUrl: path.join('/uploaded', path.basename(final_path)),
+            completionUrl: path.join('/uploaded', path.basename(res.body.result_image))
+          });
+        })
+      });
+
+
+    });
 
   });
 
