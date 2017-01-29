@@ -163,3 +163,7 @@ h3.nospacing{
   margin: 0px;
   margin-bottom: -15px;
 }
+
+.row#vertcenter{
+  margin-top: 20vh;
+}

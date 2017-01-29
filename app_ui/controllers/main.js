@@ -13,3 +13,7 @@ module.exports.examples = function(req, res){
 module.exports.contact = function(req, res){
   res.render('contact', { title: 'Contact' });
 };
+
+module.exports.image = function(req, res){  
+  res.render('image', { title: 'Image' });
+};
