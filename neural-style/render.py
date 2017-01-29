@@ -97,9 +97,9 @@ class TheNetHTTPRequestHandler(BaseHTTPRequestHandler):
 
             image = imread(image_path, mode='RGB')
 
-            while image.shape[0] > 1024 or image.shape[1] > 1024:
-                im_shape = map(lambda x: int(x / 2), image.shape)
-                image = imresize(image, (im_shape[1], im_shape[0]))
+            while image.shape[0] > 768 or image.shape[1] > 768:
+                im_shape = map(lambda x: int(x / 2), list(image.shape))
+                image = imresize(image, (im_shape[0], im_shape[1]))
                 imsave(image_path, image)
 
             transformed = consume_model(image, model_name)
