@@ -43,10 +43,11 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True,
 
     if deconv:
         shape = tf.shape(x)
+        num_features_tensor = tf.constant(num_features, dtype=tf.int32)
         try:
-            output_size = tf.pack([shape[0], shape[1] * upscale, shape[2] * upscale, shape[3]], axis=0)
+            output_size = tf.pack([shape[0], shape[1] * upscale, shape[2] * upscale, num_features_tensor], axis=0)
         except AttributeError:
-            output_size = tf.stack([shape[0], shape[1] * upscale, shape[2] * upscale, shape[3]], axis=0)
+            output_size = tf.stack([shape[0], shape[1] * upscale, shape[2] * upscale, num_features_tensor], axis=0)
 
         conv = tf.nn.conv2d_transpose(x, weights,
                                       strides=[1] + list(strides) + [1],
