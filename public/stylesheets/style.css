@@ -91,7 +91,8 @@ input#upload{
   width: 100vw;
 }
 
-.btn.btn-primary.btn-large{
+.btn.btn-primary.btn-large,
+.btn.btn-primary.btn-large:visited{
   border-radius: 0;
   padding: 30px;
   margin: 0 20px 40px 20px;
@@ -156,4 +157,9 @@ a > p {
 
 a > p.small{
   font-size: 1.25em;
+}
+
+h3.nospacing{
+  margin: 0px;
+  margin-bottom: -15px;
 }

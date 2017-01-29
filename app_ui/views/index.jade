@@ -16,6 +16,21 @@ block content
         button#upload-submit.btn.btn-primary.btn-large(type="button") Upload
         .alert.alert-danger.hidden(role="alert") Please upload a photo.
 
+  button.btn.btn-primary#imageToggle.hidden(type="button", data-toggle="modal", data-target="#imageDisplay") Launch Modal
+
+  #imageDisplay.modal.fade(tabindex="-1", role="dialog", aria-labelledby="converted image")
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          h3.nospacing Your Converted Picture
+          button.close(type="button", data-dismiss="modal", aria-label="close")
+            span(aria-hidden="true") &times;
+        .modal-body
+          img#convertedImage
+        .modal-footer
+          button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+          button.btn.btn-primary(type="button") Download
+
 block scripts
 
   script(src="./javascripts/upload.js")

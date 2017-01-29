@@ -5,22 +5,23 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');    
 var bodyParser = require('body-parser');
 var firebase = require('firebase');
-
-var routes = require('./app_ui/routes/index');
-var routesApi = require('./app_api/routes');
-var users = require('./app_ui/routes/users');
-
-var app = express();
+var config = require('./config');
 
 //firebase
 var config = {
-    apiKey: "AIzaSyDzEpeumcCznN6ICzjLSiRfMCUBfRqF_q0",
+    apiKey: config.firebaseKey,
     authDomain: "mchacks-2017.firebaseapp.com",
     databaseURL: "https://mchacks-2017.firebaseio.com",
     storageBucket: "mchacks-2017.appspot.com",
     messagingSenderId: "152582265055"
 };
 firebase.initializeApp(config);
+
+var routes = require('./app_ui/routes/index');
+var routesApi = require('./app_api/routes');
+var users = require('./app_ui/routes/users');
+
+var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'app_ui', 'views'));

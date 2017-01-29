@@ -1,0 +1,1 @@
+module.exports.firebaseKey = 'AIzaSyDzEpeumcCznN6ICzjLSiRfMCUBfRqF_q0';
