@@ -1,6 +1,7 @@
 body{
   text-align: center;
   height: 100vh;
+  overflow-x: hidden;
 }
 
 h1, h2, nav{
@@ -81,12 +82,13 @@ input#upload{
   font-size: 1.5em;
 }
 
-#blue{
+div.blue{
   background-color: #b3ffff;
   width: 100vw;
+  padding-top: 30px;
 }
 
-#grey{
+div.grey{
   background-color: #cccccc;
   width: 100vw;
 }
@@ -94,12 +96,22 @@ input#upload{
 .btn.btn-primary.btn-large,
 .btn.btn-primary.btn-large:visited{
   border-radius: 0;
-  padding: 30px;
-  margin: 0 20px 40px 20px;
   font-size: 2em;
-  font-family: 'Roboto', Helvetica, Arial, sans-serif;
-  text-transform: uppercase;
+  width:100%;
+}
+
+.btn.btn-primary.btn-large, #img-preview{
+  margin: 20px 0 20px 0;
   box-shadow: 2px 2px #333333;
+  color: white;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+#img-preview{
+  padding: 30px;
 }
 
 i.material-icons{
@@ -134,7 +146,7 @@ i.material-icons{
   }
 
   .row{
-    padding: 30px;
+    padding: 0 30px 30px 30px;
   }
 
   .navbar-default .navbar-nav > li.active > a, 
@@ -147,10 +159,14 @@ i.material-icons{
   }
 }
 
-@media (min-width: 899px){
-  #blue{
+@media (min-width: 992px){
+  .pin{
     position: fixed;
     bottom: 0;
+  }
+
+  .btn.btn-primary{
+    height: 334px;
   }
 }
 
@@ -203,10 +219,6 @@ div#sample{
   height: 200px;
 }
 
-#fileselected{
-  padding-top: 27px;
-}
-
 .no-gutter{
   padding-left: 0px;
   padding-right: 0px;
@@ -215,4 +227,23 @@ div#sample{
 .img-responsive{
   margin-left: auto;
   margin-right: auto;
+  margin-bottom: 20px;
+}
+
+.offset-bottom{
+  padding-bottom: 60px;
+}
+
+p#fileselected, .alert{
+  padding: 0;
+  margin: 0;
+  text-transform: none;
+  font-size: 0.5em;
+  font-family: Helvetica, sans-serif;
+  font-weight: normal;
+  white-space: normal;
+}
+
+.hidden{
+  display:;
 }
