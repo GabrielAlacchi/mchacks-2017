@@ -1,6 +1,7 @@
 
 import tensorflow as tf
 from the_net import TheNet
+from unet import UNet
 from os import path
 import os
 import argparse
@@ -16,9 +17,10 @@ PORT = 8000
 sess = tf.Session()
 decoder = json.JSONDecoder()
 
-def init_models(model_files, sess):
 
-    thenet = TheNet()
+def init_models(model_files, sess, Model):
+
+    thenet = Model()
     x = tf.placeholder(dtype=tf.float32, shape=(1, None, None, 3), name='placeholder')
 
     for model_file in model_files:
@@ -101,11 +103,17 @@ def main(argv):
     argparser.add_argument('-m', '--model-files', required=True,
                            dest='model_files',
                            help='Comma delimited list of model files. Example: --model-files starry_night.npz,picasso.npz')
+    argparser.add_argument('--model', dest='model', default='thenet',
+                           help='The model to use')
 
     args = argparser.parse_args(argv)
     model_files = args.model_files.split(',')
 
-    init_models(model_files, sess)
+    if args.thenet:
+        Model = TheNet
+    else:
+        Model = UNet
+    init_models(model_files, sess, Model)
 
     Handler = TheNetHTTPRequestHandler
 
