@@ -114,7 +114,7 @@ def main(argv):
 
     print "-----------------------------------------------"
 
-    thenet.save_model('weights/starry_night.npz', base_scope='starry_night', sess=sess)
+    thenet.save_model(args.save_dest, base_scope='starry_night', sess=sess)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
