@@ -166,9 +166,23 @@ i.material-icons{
   }
 }
 
+@media (max-width:1199px){
+  .lefts, .right{
+    text-align: center;
+  }
+}
+
 @media (min-width:1200px){
     .btn.btn-primary{
     height: 157px;
+  }
+
+  .lefts{
+    text-align: right;
+  }
+
+  .right{
+    text-aligh: left;
   }
 }
 
