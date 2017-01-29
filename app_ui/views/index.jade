@@ -1,24 +1,25 @@
 extends layout
 
 block content
-  .row
+  .row.offset-bottom
     .col-md-8.col-md-offset-2
       h1 p
         span.red AI
         span nt
       h3.subtitle Make a simple photo into a true work of art.
     
-  .row#blue
-    .col-md-8.col-md-offset-2.no-gutter
-      .col-sm-3.no-gutter
-        i.material-icons backup
-      .col-sm-9.no-gutter
-        .col-md-8.no-gutter
-          input#upload(type="file", name="uploads[]" multiple="multiple")
-          button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
-          button#upload-submit.btn.btn-primary.btn-large(type="button") Transform
+  .row.blue.pin 
+    .col-md-10.col-md-offset-1
+      input#upload(type="file", name="uploads[]" multiple="multiple")
+      .col-md-4#upload
+        button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
           p#fileselected.text-center
-        .col-md-4.no-gutter
+          .alert.alert-danger#ext.hidden Please upload a JPEG or PNG file.
+          .alert.alert-danger#exist.hidden Please upload a valid file.
+      .col-md-4#upload-submit
+        button#upload-submit.btn.btn-primary.btn-large(type="button") Transform
+      .col-md-4
+        #img-preview.btn-primary
           #transformation.form-group
             label(for="sel1") Select List:
             select.form-control#sel1

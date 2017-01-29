@@ -1,4 +1,3 @@
-
 var models = {
   'The Scream': 'the_scream',
   'Mosaic': 'mosaic',
@@ -10,7 +9,7 @@ var models = {
   'Udnie': 'udnie'
 };
 
-var selectedModel;
+var selectedModel = models[$('#sel1 option:selected').text()];
 
 $(document).ready(function(){
   $('#upload-btn').on('click', function(){
@@ -18,7 +17,20 @@ $(document).ready(function(){
   });
 
   $('#upload').on('change', function(e){
-    $('#fileselected').html($('#upload').prop("files")[0]['name']);
+    var ext = $('#upload').prop("files")[0]['name'].split('.')[1];
+    if (!ext){
+      $('#exist').removeClass('hidden');
+      $('#ext').addClass('hidden');
+      $('#fileselected').html('');
+    } else if (ext !== 'png'&& ext !== 'jpg'){
+      $('#ext').removeClass('hidden');
+      $('#exist').addClass('hidden');
+      $('#fileselected').html('');
+    } else {
+      $('#exist').addClass('hidden');
+      $('#ext').addClass('hidden');
+      $('#fileselected').html($('#upload').prop("files")[0]['name']);
+    }
   });
 
   $('#sel1').on('change', function(){
@@ -30,6 +42,10 @@ $(document).ready(function(){
     var fileElement = document.getElementById('upload');
     var file = fileElement.files[0];
     var extension = file.name.split('.')[1];
+
+    if(extension !== 'png' && extension !=='jpg'){
+      return;
+    }
 
     var formData = new FormData();
     formData.append('file', file);
