@@ -23,15 +23,7 @@ $(document).ready(function(){
       if (request.readyState = XMLHttpRequest.DONE) {
         var response = JSON.parse(request.responseText);
 
-        var first = true;
-        db.ref('/uploads/' + response.fileKey).on('value', function(snapshot) {
-          var val = snapshot.val();
-          if (val.completionUrl && first) {
-            $('#imageToggle').click();
-            $('#convertedImage').html('<img src="' + snapshot.completion_url + '">');
-            first = false;
-          }
-        })
+        window.location.replace('/image?key=' + response.fileKey);
       }
     };
 
