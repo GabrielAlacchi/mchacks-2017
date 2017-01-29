@@ -34,6 +34,9 @@ def main(argv):
     argparser.add_argument('-l', '--learning-rate', default=LEARNING_RATE, type=float,
                            dest='learning_rate',
                            help='Learning rate to train with')
+    argparser.add_argument('-b', '--batch-size', default=BATCH_SIZE, type=int,
+                           dest='batch_size',
+                           help='Batch Size')
 
     args = argparser.parse_args(argv)
 
@@ -46,7 +49,7 @@ def main(argv):
     else:
         thenet = UNet()
 
-    image_pl = tf.placeholder(dtype=tf.float32, shape=(BATCH_SIZE, 224, 224, 3))
+    image_pl = tf.placeholder(dtype=tf.float32, shape=(args.batch_size, 224, 224, 3))
 
     with tf.variable_scope('starry_night'):
         model = thenet.create_model(image_pl, trainable=True)
@@ -73,9 +76,9 @@ def main(argv):
 
     sess.run(tf.global_variables_initializer())
 
-    training, testing = create_data_sets('data')
-    training.set_batch_size(BATCH_SIZE)
-    testing.set_batch_size(BATCH_SIZE)
+    training, testing = create_data_sets('data', training_reserve=0.3, testing_reserve=0.7)
+    training.set_batch_size(args.batch_size)
+    testing.set_batch_size(args.batch_size)
 
     num_steps_per_epoch = training.get_epoch_steps()
     epochs_to_train = args.epochs
@@ -114,7 +117,7 @@ def main(argv):
 
     print "-----------------------------------------------"
 
-    thenet.save_model('weights/starry_night.npz', base_scope='starry_night', sess=sess)
+    thenet.save_model(args.save_dest, base_scope='starry_night', sess=sess)
 
 if __name__ == "__main__":
     main(sys.argv[1:])

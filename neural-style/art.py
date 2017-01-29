@@ -7,7 +7,7 @@ import sys
 import cv2
 from tf_util import tensor_size
 
-ALPHA = 1e-6
+ALPHA = 1e-5
 BETA = 1e-2
 TV_WEIGHT = 1e-2
 
