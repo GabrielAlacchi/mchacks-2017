@@ -257,3 +257,7 @@ p#fileselected, .alert{
 .centered{
   padding: 15vh 100px 0 100px;
 }
+
+#imgerror{
+  font-size: 2em;
+}

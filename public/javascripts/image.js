@@ -26,6 +26,10 @@ $(function() {
       $('#filtered').removeClass('centered').attr('src', val.completionUrl);
       $('#download').removeClass('hidden').attr('href', val.completionUrl);
     }
+    if (val.error){
+      $('#filtered').attr('src', '');
+      $('#imgerror').removeClass('hidden').html(val.error);
+    }
 
   }); 
 });
