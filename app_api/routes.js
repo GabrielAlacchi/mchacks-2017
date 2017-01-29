@@ -39,10 +39,15 @@ module.exports = function(firebase, uploadDir) {
             model: fields.model
           }
         }, function(err, res) {
-          db.ref('/uploads/' + fileKey).set({
-            fileUrl: path.join('/uploaded', path.basename(final_path)),
-            completionUrl: path.join('/uploaded', path.basename(res.body.result_image))
-          });
+          if (err) {
+            console.error(err);
+          }
+          else {
+            db.ref('/uploads/' + fileKey).set({
+              fileUrl: path.join('/uploaded', path.basename(final_path)),
+              completionUrl: path.join('/uploaded', path.basename(res.body.result_image))
+            });
+          }
         })
       });
 
