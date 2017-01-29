@@ -12,6 +12,10 @@ var models = {
 var selectedModel = models[$('#sel1 option:selected').text()];
 
 $(document).ready(function(){
+
+  selectedModel = models[$('#sel1 option:selected').text()];
+  $('#sample').html('<img class="img-responsive" src=./images/'+selectedModel+'.jpg>');
+
   $('#upload-btn').on('click', function(){
     $('#upload').click();
   });
