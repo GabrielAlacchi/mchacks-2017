@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  .row
+    .col-md-8.col-md-offset-2
+      h1= title
+      h3.subtitle Make a simple photo into a true work of art.
+    
+  .row#blue
+    .col-md-8.col-md-offset-2
+      .row
+        i.material-icons backup
+      .row
+        input#upload(type="file", name="uploads[]" multiple="multiple")
+        button#upload-btn.btn.btn-primary.btn-large(type="button") Select File
+        button#upload-submit.btn.btn-primary.btn-large(type="button") Upload
+        .alert.alert-danger.hidden(role="alert") Please upload a photo.
+
+  button.btn.btn-primary#imageToggle.hidden(type="button", data-toggle="modal", data-target="#imageDisplay") Launch Modal
+
+  #imageDisplay.modal.fade(tabindex="-1", role="dialog", aria-labelledby="converted image")
+    .modal-dialog(role="document")
+      .modal-content
+        .modal-header
+          h3.nospacing Your Converted Picture
+          button.close(type="button", data-dismiss="modal", aria-label="close")
+            span(aria-hidden="true") &times;
+        .modal-body
+          img#convertedImage
+        .modal-footer
+          button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+          button.btn.btn-primary(type="button") Download
+
+block scripts
+
+  script(src="https://www.gstatic.com/firebasejs/3.6.7/firebase.js")
+  script(src="/javascripts/firebase.js")
+  script(src="./javascripts/upload.js")

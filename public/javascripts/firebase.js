@@ -1,4 +1,3 @@
-
 var config = {
   apiKey: 'AIzaSyDzEpeumcCznN6ICzjLSiRfMCUBfRqF_q0',
   authDomain: "mchacks-2017.firebaseapp.com",
