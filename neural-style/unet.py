@@ -6,7 +6,7 @@ import numpy as np
 UNET_COLLECTION = 'unet_collection'
 
 
-class TheNet:
+class UNet:
 
     def create_model(self, x, trainable=False, reuse=False):
 
@@ -24,17 +24,22 @@ class TheNet:
                                        trainable=trainable, collection=UNET_COLLECTION)
 
         with tf.variable_scope('conv2_2'):
-            model =
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=128, strides=(2, 2),
+                                       trainable=trainable, collection=UNET_COLLECTION)
 
         with tf.variable_scope('deconv_1'):
             model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=64, trainable=trainable, strides=(2, 2),
                                        deconv=True, upscale=2, collection=UNET_COLLECTION)
-            model = tf_util.instance_norm(model)
+            model = tf.concat(concat_dim=3, values=[conv2_1, model])
 
         with tf.variable_scope('deconv_2'):
-            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=3, trainable=trainable, strides=(2, 2),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=32, trainable=trainable, strides=(2, 2),
                                        deconv=True, upscale=2, collection=UNET_COLLECTION)
-            model = tf_util.instance_norm(model)
+            model = tf.concat(concat_dim=3, values=[conv1_1, model])
+
+        with tf.variable_scope('conv_output'):
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=3, strides=(1, 1),
+                                       trainable=trainable, collection=UNET_COLLECTION)
             model = 255.0 * tf.nn.sigmoid(model, name='activation')
 
         return model
