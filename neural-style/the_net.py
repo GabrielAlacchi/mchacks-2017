@@ -17,12 +17,12 @@ class TheNet:
             model = tf_util.instance_norm(model)
 
         with tf.variable_scope('conv2_1'):
-            model = tf_util.conv_layer(model, filter_size=(5, 5), num_features=64, strides=(2, 2),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=64, strides=(2, 2),
                                        trainable=trainable, collection=THENET_COLLECTION)
             model = tf_util.instance_norm(model)
 
         with tf.variable_scope('conv2_2'):
-            model = tf_util.conv_layer(model, filter_size=(5, 5), num_features=128, strides=(2, 2),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=128, strides=(2, 2),
                                        trainable=trainable, collection=THENET_COLLECTION)
             model = tf_util.instance_norm(model)
 
@@ -32,21 +32,18 @@ class TheNet:
         with tf.variable_scope('res_2'):
             model = tf_util.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=THENET_COLLECTION)
 
-        with tf.variable_scope('res_3'):
-            model = tf_util.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=THENET_COLLECTION)
-
         with tf.variable_scope('deconv_1'):
-            model = tf_util.conv_layer(model, filter_size=(5, 5), num_features=64, trainable=trainable, strides=(2, 2),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=64, trainable=trainable, strides=(2, 2),
                                        deconv=True, upscale=2, collection=THENET_COLLECTION)
             model = tf_util.instance_norm(model)
 
         with tf.variable_scope('deconv_2'):
-            model = tf_util.conv_layer(model, filter_size=(5, 5), num_features=32, trainable=trainable, strides=(2, 2),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=32, trainable=trainable, strides=(2, 2),
                                        deconv=True, upscale=2, collection=THENET_COLLECTION)
             model = tf_util.instance_norm(model)
 
         with tf.variable_scope('output'):
-            model = tf_util.conv_layer(model, filter_size=(5, 5), num_features=3, trainable=trainable, strides=(1, 1),
+            model = tf_util.conv_layer(model, filter_size=(3, 3), num_features=3, trainable=trainable, strides=(1, 1),
                                        collection=THENET_COLLECTION)
             model = tf_util.instance_norm(model)
             model = 255.0 * tf.nn.sigmoid(model, name='activation')
