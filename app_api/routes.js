@@ -41,6 +41,10 @@ module.exports = function(firebase, uploadDir) {
         }, function(err, res) {
           if (err) {
             console.error(err);
+            db.ref('/uploads/' + fileKey).set({
+              fileUrl: path.join('/uploaded', path.basename(final_path)),
+              error: 'There was an error generating the image.'
+            })
           }
           else {
             db.ref('/uploads/' + fileKey).set({
