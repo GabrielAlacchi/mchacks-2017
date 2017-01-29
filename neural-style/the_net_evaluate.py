@@ -109,7 +109,7 @@ def main(argv):
     args = argparser.parse_args(argv)
     model_files = args.model_files.split(',')
 
-    if args.thenet:
+    if args.model == 'thenet':
         Model = TheNet
     else:
         Model = UNet
