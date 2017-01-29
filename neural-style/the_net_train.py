@@ -59,6 +59,8 @@ def main(argv):
     print "Running %d epochs with %d training steps per epoch" % (epochs_to_train, num_steps_per_epoch)
     for epoch in xrange(epochs_to_train):
 
+        training.shuffle()
+
         print "Epoch: %d --- Epochs left: %d" % (epoch, epochs_to_train - epoch)
         print "-----------------------------------------------"
 
@@ -83,27 +85,9 @@ def main(argv):
             image_pl: test_images,
         })
 
-        print "\nFinal results for epoch %d --- loss: %f --- accuracy: %f" % (epoch, loss_val, accuracy)
+        print "\nFinal results for epoch %d --- loss: %f" % (epoch, loss_val)
 
     print "-----------------------------------------------"
-
-    print "Loading validation set for final accuracy..."
-
-    final_loss = 0.0
-    final_accuracy = 0.0
-
-    for step in xrange(testing.get_epoch_steps()):
-        validation_images, validation_labels = testing.next_batch()
-        loss_val, accuracy = sess.run(loss, feed_dict={
-            image_pl: validation_images
-        })
-
-        final_loss += loss_val
-        final_accuracy += accuracy
-
-    final_loss /= testing.get_epoch_steps()
-
-    print "Final Loss: %f" % final_loss
 
     thenet.save_model('weights/starry_night.npz', base_scope='starry_night', sess=sess)
 
