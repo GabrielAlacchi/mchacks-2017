@@ -177,9 +177,13 @@ h3.nospacing{
 }
 
 .row#vertcenter{
-  margin-top: 15vh;
+  /* margin-top: 15vh; */
 }
 
 .row#vertcenter > div > div {
   padding: 60px 20px 60px 20px;
+}
+
+.image {
+  max-width: 100%;
 }

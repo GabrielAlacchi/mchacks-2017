@@ -1,6 +1,14 @@
 
-var db = firebase.database();
-var storage = firebase.storage();
+var models = {
+  'The Scream': 'the_scream',
+  'Mosaic': 'mosaic',
+  'La Muse': 'la_muse',
+  'Wave': 'wave',
+  'Feathers': 'feathers',
+  'Composition VII': 'composition_vii',
+  'Cubist': 'cubist',
+  'Udnie': 'udnie'
+};
 
 $(document).ready(function(){
   $('#upload-btn').on('click', function(){
@@ -17,8 +25,11 @@ $(document).ready(function(){
     var file = fileElement.files[0];
     var extension = file.name.split('.')[1];
 
+    var selectedModel = models[$('#sel1 option:selected').text()];
+
     var formData = new FormData();
     formData.append('file', file);
+    formData.append('model', selectedModel);
     formData.append('extension', extension);
 
     var request = new XMLHttpRequest();
@@ -31,7 +42,6 @@ $(document).ready(function(){
         window.location.replace('/image?key=' + response.fileKey);
       }
     };
-
 
     request.send(formData);
 

@@ -36,7 +36,7 @@ module.exports = function(firebase, uploadDir) {
           method: 'POST',
           json: {
             image_path: final_path,
-            model: 'cubist'
+            model: fields.model
           }
         }, function(err, res) {
           db.ref('/uploads/' + fileKey).set({
