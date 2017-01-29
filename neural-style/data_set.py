@@ -105,7 +105,7 @@ def create_data_sets(data_dir, training_reserve=0.7, testing_reserve=0.3, net_ty
             DataSet(testing_names, data_dir, net_type))
 
 
-def resize_bulk(data_dir):
+def resize_bulk(data_dir, img_size):
     image_dir = path.join(data_dir, 'img')
     files = listdir(image_dir)
 
