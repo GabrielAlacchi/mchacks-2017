@@ -69,6 +69,18 @@ class TheNetHTTPRequestHandler(BaseHTTPRequestHandler):
 
             image = cv2.imread(image_path)
 
+            resize_image = False
+            new_size = [0, 0]
+            if image.shape[0] % 4 != 0:
+                new_size[0] = image.shape[0] - image.shape[0] % 4
+                resize_image = True
+            if image.shape[1] % 4 != 0:
+                new_size[1] = image.shape[1] - image.shape[1] % 4
+                resize_image = True
+
+            if resize_image:
+                cv2.resize(image, (new_size[1], new_size[0]))
+
             transformed = consume_model(image, sess, model_name)
             image_words = image_path.split('.')
             transform_path = '%s_%s.%s' % (image_words[0], model_name, image_words[1])
