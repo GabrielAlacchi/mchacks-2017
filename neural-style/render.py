@@ -31,31 +31,6 @@ def parse_args():
     return args
 
 
-def run(session):
-    args = parse_args()
-
-    saver = tf.train.import_meta_graph(args.arch, clear_devices=True)
-    saver.restore(session, args.model)
-    inputs = tf.get_collection("inputs")[0]
-    output = tf.get_collection("output")[0]
-
-    time_s = time.time()
-    result = output.eval({inputs : args.image})
-    result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-    result = np.squeeze(result, 0)
-    time_t = time.time()
-    print "First time. Time used: ", time_t - time_s
-
-    time_s = time.time()
-    result = output.eval({inputs : args.image})
-    result = np.clip(result, 0.0, 255.0).astype(np.uint8)
-    result = np.squeeze(result, 0)
-    time_t = time.time()
-    print "Second time. Time used: ", time_t - time_s
-
-    imsave(args.output, result)
-
-
 def init_models(meta_graph):
 
     print "Loading meta graph..."
