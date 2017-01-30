@@ -14,7 +14,13 @@ RUN pip install tensorflow \
                 scipy \
                 simplejson
 
-COPY . /paint-me
+COPY *.js package.json /paint-me/
+COPY app_api /paint-me/app_api/
+COPY app_ui /paint-me/app_ui/
+COPY public /paint-me/public/
+COPY neural-style /paint-me/neural-style
+
+# COPY . /paint-me
 WORKDIR /paint-me
 
 VOLUME /paint-me/public/uploaded
