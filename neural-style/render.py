@@ -97,8 +97,9 @@ class TheNetHTTPRequestHandler(BaseHTTPRequestHandler):
 
             image = imread(image_path, mode='RGB')
 
-            while image.shape[0] > 768 or image.shape[1] > 768:
-                im_shape = map(lambda x: int(x / 2), list(image.shape))
+            if image.shape[0] > 828 or image.shape[1] > 828:
+                ratio = 828.0 / float(max(image.shape[0], image.shape[1]))
+                im_shape = map(lambda x: int(ratio * x), list(image.shape))
                 image = imresize(image, (im_shape[0], im_shape[1]))
                 imsave(image_path, image)
 
