@@ -7,6 +7,21 @@ var bodyParser = require('body-parser');
 var firebase = require('firebase');
 var config = require('./config');
 
+var spawn = require('child_process').spawn;
+
+function spawnProcess() {
+    var scriptPath = path.join(__dirname, 'neural-style', 'render.py');
+    var modelsPath = path.join(__dirname, 'neural-style', 'models');
+    var proc = spawn('python', [scriptPath, '-m', modelsPath]);
+
+    proc.on('close', function(code) {
+        console.error('Python process has shutdown unexpectedly...');
+        spawnProcess();
+    });
+}
+
+spawnProcess();
+
 //firebase
 var conf = {
     apiKey: config.firebaseKey,

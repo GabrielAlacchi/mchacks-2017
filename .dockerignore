@@ -1,0 +1,10 @@
+
+public/uploaded/upload*
+node_modules
+
+neural-style/weights
+neural-style/data
+
+# Jetbrains
+.idea/
+neural-style/.idea

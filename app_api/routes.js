@@ -19,7 +19,12 @@ module.exports = function(firebase, uploadDir) {
     form.parse(req, function(err, fields, files) {
 
       var ext = fields.extension;
-      var file = files.file.path;
+
+      try {
+        var file = files.file.path;
+      } catch (e) {
+        res.status(500).end();
+      }
 
       var final_path = file + '.' + ext;
       fs.rename(file, final_path, function(err) {
