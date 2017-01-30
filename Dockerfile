@@ -18,6 +18,7 @@ COPY *.js package.json /paint-me/
 COPY app_api /paint-me/app_api/
 COPY app_ui /paint-me/app_ui/
 COPY public /paint-me/public/
+COPY bin /paint-me/bin/
 COPY neural-style /paint-me/neural-style
 
 # COPY . /paint-me
