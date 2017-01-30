@@ -54,7 +54,7 @@ $(document).ready(function(){
       if (request.readyState = XMLHttpRequest.DONE) {
         var response = JSON.parse(request.responseText);
 
-        window.location.replace('/image?key=' + response.fileKey);
+        window.location.href = '/image?key=' + response.fileKey;
       }
     };
 
