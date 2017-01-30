@@ -20,11 +20,12 @@ $(function() {
 
     var val = snapshot.val();
     if (val.fileUrl) {
-      $('#original').attr('src', val.fileUrl);
+      $('#original').removeClass('centered').attr('src', val.fileUrl);
     }
     if (val.completionUrl) {
-      $('#filtered').attr('src', val.completionUrl);
+      $('#filtered').removeClass('centered').attr('src', val.completionUrl);
+      $('#download').removeClass('hidden').attr('href', val.completionUrl);
     }
 
-  });
+  }); 
 });
