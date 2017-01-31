@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-/*acccess controllers*/
+/*access controllers*/
 var ctrlMain = require ('../controllers/main');
 
 router.get('/', ctrlMain.index);

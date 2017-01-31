@@ -4,8 +4,7 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');    
 var bodyParser = require('body-parser');
-var firebase = require('firebase');
-var config = require('./config');
+var firebase = require('./config');
 
 var spawn = require('child_process').spawn;
 
@@ -21,16 +20,6 @@ function spawnProcess() {
 }
 
 spawnProcess();
-
-//firebase
-var conf = {
-    apiKey: config.firebaseKey,
-    authDomain: "mchacks-2017.firebaseapp.com",
-    databaseURL: "https://mchacks-2017.firebaseio.com",
-    storageBucket: "mchacks-2017.appspot.com",
-    messagingSenderId: "152582265055"
-};
-firebase.initializeApp(conf);
 
 var routes = require('./app_ui/routes/index');
 var routesApi = require('./app_api/routes')(firebase, path.join(__dirname, 'public', 'uploaded'));
