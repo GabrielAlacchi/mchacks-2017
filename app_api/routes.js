@@ -6,6 +6,10 @@ var path = require('path');
 var formidable = require('formidable');
 var request = require('request');
 
+function validatePath(path) {
+  return path && (typeof path === 'string')
+}
+
 module.exports = function(firebase, uploadDir) {
 
   var db = firebase.database();
@@ -23,10 +27,17 @@ module.exports = function(firebase, uploadDir) {
       try {
         var file = files.file.path;
       } catch (e) {
-        res.status(500).end();
+        res.status(500).end('No File Was Sent');
+        return;
       }
 
       var final_path = file + '.' + ext;
+
+      if (!validatePath(path)) {
+        res.status(500).end('Upload Failed');
+        return;
+      }
+
       fs.rename(file, final_path, function(err) {
         var fileKey = db.ref('/uploads').push({
           fileUrl: path.join('/uploaded', path.basename(final_path))
