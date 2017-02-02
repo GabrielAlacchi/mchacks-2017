@@ -6,8 +6,8 @@ var path = require('path');
 var formidable = require('formidable');
 var request = require('request');
 
-function validatePath(path) {
-  return path && (typeof path === 'string')
+function validatePath(filePath) {
+  return filePath && (typeof filePath === 'string')
 }
 
 module.exports = function(firebase, uploadDir) {
@@ -33,7 +33,7 @@ module.exports = function(firebase, uploadDir) {
 
       var final_path = file + '.' + ext;
 
-      if (!validatePath(path)) {
+      if (!validatePath(final_path)) {
         res.status(500).end('Upload Failed');
         return;
       }
