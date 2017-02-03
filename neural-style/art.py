@@ -5,7 +5,7 @@ import numpy as np
 import sys
 
 import cv2
-from tf_util import tensor_size
+from ops import tensor_size
 
 ALPHA = 1e-5
 BETA = 1e-2
@@ -52,7 +52,8 @@ def style_loss(layer, a_l):
     return tf.reduce_mean(tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
 
 
-def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices, alpha=ALPHA, beta=BETA):
+def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices,
+               alpha=ALPHA, beta=BETA, total_variation=True):
 
     shape = tf.shape(image)
 
@@ -67,14 +68,17 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
     total_content_loss /= len(content_layers)
     total_style_loss /= len(style_layers)
 
-    # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
-    tv_y_size = tensor_size(image[:, 1:, :, :])
-    tv_x_size = tensor_size(image[:, :, 1:, :])
-    tv_loss = TV_WEIGHT * 2 * (
-        (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
-         tf.cast(tv_y_size, tf.float32)) +
-        (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
-         tf.cast(tv_x_size, tf.float32)))
+    if total_variation:
+        # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
+        tv_y_size = tensor_size(image[:, 1:, :, :])
+        tv_x_size = tensor_size(image[:, :, 1:, :])
+        tv_loss = TV_WEIGHT * 2 * (
+            (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
+             tf.cast(tv_y_size, tf.float32)) +
+            (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
+             tf.cast(tv_x_size, tf.float32)))
+    else:
+        tv_loss = tf.constant(0.0, dtype=tf.float32)
 
     return total_content_loss * alpha + beta * total_style_loss + tv_loss
 
@@ -89,6 +93,7 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
     gram_matrices = []
     for layer in style_layers:
+        print "Precomputing gram matrix for %s" % layer
         layer_op = vgg.get_layer(layer)
         gram_op = gram_matrix(feature_matrix(layer_op))
         gram = sess.run(gram_op, feed_dict={

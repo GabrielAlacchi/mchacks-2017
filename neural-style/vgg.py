@@ -5,7 +5,7 @@ import os
 import urllib
 from scipy.misc import imread, imresize
 
-from tf_util import kernel_variable, bias_variable
+from ops import kernel_variable, bias_variable
 
 
 def download_weights_maybe(weight_file):

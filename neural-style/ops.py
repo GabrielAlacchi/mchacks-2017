@@ -1,5 +1,6 @@
 
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
 
 ARTNET_BATCHNORM_COLLECTION = 'batch_norm'
 ARTNET_WEIGHT_COLLECTION = 'artnet_collection'
@@ -84,63 +85,77 @@ def res_layer(x, filter_size=None, trainable=True, collection=tf.GraphKeys.GLOBA
     return tf.add(x, conv2, name='residual')
 
 
-def batch_norm(x, trainable=True):
-    x_shape = x.get_shape()
-    params_shape = x_shape[-1:]
+def instance_norm(x, gamma=None, beta=None, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
 
-    # [0, 1, 2] for conv layers and [0] for fc layers
-    axis = list(range(len(x_shape) - 1))
-
-    with tf.variable_scope('batch_norm'):
-        beta = _get_variable('beta',
-                             initializer=tf.zeros(dtype=tf.float32, shape=params_shape))
-
-        gamma = _get_variable('gamma',
-                              initializer=tf.ones(dtype=tf.float32, shape=params_shape))
-
-        # Op for computing the mean and variance
-        mean, variance = tf.nn.moments(x, axes=axis, name='moments')
-
-        if not trainable:
-            mean = _get_variable(name='population_mean',
-                                 trainable=False,
-                                 initializer=tf.zeros(dtype=tf.float32, shape=params_shape))
-
-            variance = _get_variable(name='population_variance',
-                                     trainable=False,
-                                     initializer=tf.ones(dtype=tf.float32, shape=params_shape))
-
-            tf.add_to_collection(ARTNET_BATCHNORM_COLLECTION, mean)
-            tf.add_to_collection(ARTNET_BATCHNORM_COLLECTION, variance)
-
-        return tf.nn.batch_normalization(x, mean, variance, beta, gamma, BN_EPSILON)
-
-
-def instance_norm(x):
-    epsilon = 1e-9
-
+    params_shape = x.get_shape()[-1:]
     mean, var = tf.nn.moments(x, [1, 2], keep_dims=True)
 
-    return tf.div(tf.sub(x, mean), tf.sqrt(tf.add(var, epsilon)))
+    if gamma is None:
+        gamma = tf.get_variable('gamma',
+                                initializer=tf.ones(shape=params_shape, dtype=tf.float32),
+                                trainable=trainable,
+                                dtype=tf.float32,
+                                collections=[collection])
+
+    if beta is None:
+        beta = tf.get_variable('beta',
+                               initializer=tf.zeros(shape=params_shape, dtype=tf.float32),
+                               trainable=trainable,
+                               dtype=tf.float32,
+                               collections=[collection])
+
+    return tf.nn.batch_normalization(x, mean, var, beta, gamma, BN_EPSILON)
 
 
-def _get_variable(name, initializer, shape=None, dtype=tf.float32, trainable=True, collection=ARTNET_WEIGHT_COLLECTION):
-    collections = [tf.GraphKeys.GLOBAL_VARIABLES, ARTNET_WEIGHT_COLLECTION]
-    if shape:
-        return tf.get_variable(name,
-                               shape=shape,
-                               initializer=initializer,
-                               dtype=dtype,
-                               collections=collections,
-                               trainable=trainable)
-    else:
-        return tf.get_variable(name,
-                               initializer=initializer,
-                               dtype=dtype,
-                               collections=collections,
-                               trainable=trainable)
+def weighted_instance_norm(x, style_weights, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+    """Instance normalization with weighted style_weightings
+
+    Args:
+        x: A tensor with (batch, height, width, depth) dimensions.
+        style_weights: A 1D tensor of style weights of type tf.float32
+        trainable: Whether or not to have the variables to be trainable.
+        collection: The tensorflow collection to put the variables in.
+    """
+
+    num_styles = style_weights.get_shape()[-1:]
+    params_shape = x.get_shape()[-1:]
+
+    # Create a shape that is a matrix with (num_styles, depth) in dimension
+    var_shape = num_styles.concatenate(params_shape)
+
+    gamma = tf.get_variable('gamma',
+                            initializer=tf.ones(shape=var_shape, dtype=tf.float32),
+                            trainable=trainable,
+                            dtype=tf.float32,
+                            collections=[collection])
+
+    beta = tf.get_variable('beta',
+                           initializer=tf.zeros(shape=var_shape, dtype=tf.float32),
+                           trainable=trainable,
+                           dtype=tf.float32,
+                           collections=[collection])
+
+    gamma = tf.reduce_sum(gamma * style_weights, axis=0, name='style_weighted_gamma')
+    beta = tf.reduce_sum(beta * style_weights, axis=0, name='style_weighted_beta')
+
+    return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
 
 
 def tensor_size(tensor):
     shape = tf.shape(tensor)
     return shape[0] * shape[1] * shape[2] * shape[3]
+
+
+def variable_summaries(var):
+    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+
+    scope_name = var.name.split(':')[0]
+    with tf.name_scope(scope_name):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar('mean', mean)
+        with tf.name_scope('stddev'):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        tf.summary.scalar('stddev', stddev)
+        tf.summary.scalar('max', tf.reduce_max(var))
+        tf.summary.scalar('min', tf.reduce_min(var))
+        tf.summary.histogram('histogram', var)

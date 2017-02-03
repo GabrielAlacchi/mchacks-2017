@@ -106,12 +106,12 @@ def create_data_sets(data_dir, training_reserve=0.7, testing_reserve=0.3, net_ty
 
 
 def resize_bulk(data_dir, img_size):
-    image_dir = path.join(data_dir, 'img')
+    image_dir = data_dir
     files = listdir(image_dir)
 
     for image_file in files:
         print "Resizing %s" % path.basename(image_file)
-        image_file = path.join(data_dir, 'img', image_file)
+        image_file = path.join(data_dir, image_file)
         im = cv2.imread(image_file)
 
         shape = im.shape
@@ -152,8 +152,8 @@ def load_image(f, flat=False, net_type="VGG"):
             data = data.reshape([1] + list(data.shape))
         elif net_type is "Custom":
             data = data.reshape([1] + list(data.shape))
-            data = np.swapaxes(data,2,3)
-            data = np.swapaxes(data,1,2)
+            data = np.swapaxes(data, 2, 3)
+            data = np.swapaxes(data, 1, 2)
         # Set the dimension order to (BATCH, DEPTH, WIDTH, HEIGHT)
     
     return data
