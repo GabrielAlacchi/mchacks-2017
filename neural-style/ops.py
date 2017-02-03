@@ -23,7 +23,9 @@ def bias_variable(name, shape, dtype=tf.float32, trainable=True, collection=tf.G
                            collections=[collection])
 
 
-def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True, deconv=False, upscale=2, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+def conv_layer(x, filter_size, num_features, strides, trainable=True,
+               relu=True, deconv=False, upscale=2,
+               mirror_pad=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
     x_shape = x.get_shape().as_list()
 
     filters_in = x_shape[-1]
@@ -43,6 +45,7 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True,
                            collection=collection)
 
     if deconv:
+
         shape = tf.shape(x)
         num_features_tensor = tf.constant(num_features, dtype=tf.int32)
         try:
@@ -56,9 +59,21 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True,
                                       padding='SAME',
                                       name='deconv')
     else:
+        # Implement mirror padding (removes border around images)
+        if mirror_pad:
+            padding = 'VALID'
+
+            # Mirror padding
+            pad_amount = filter_size[0] // 2
+            x = tf.pad(
+                x, [[0, 0], [pad_amount, pad_amount], [pad_amount, pad_amount], [0, 0]],
+                mode='REFLECT')
+        else:
+            padding = 'SAME'
+
         conv = tf.nn.conv2d(x, weights,
                             strides=[1] + list(strides) + [1],
-                            padding='SAME',
+                            padding=padding,
                             name='conv')
 
     bias = tf.nn.bias_add(conv, biases, name='bias_add')
@@ -67,6 +82,20 @@ def conv_layer(x, filter_size, num_features, strides, trainable=True, relu=True,
         return tf.nn.relu(bias, name='activations')
     else:
         return bias
+
+
+def upsample(x, filter_size, num_features, trainable=True,
+             relu=True, upscale=2,
+             mirror_pad=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+
+    if filter_size[0] % 2 == 0 or filter_size[1] % 2 == 0:
+        raise ValueError('filter_size must be odd.')
+
+    _, height, width, _ = [s.value for s in x.get_shape()]
+    upsampled = tf.image.resize_nearest_neighbor(x, size=(upscale * height, upscale * width), name='upsample')
+    return conv_layer(upsampled, filter_size, num_features=num_features,
+                      strides=(1, 1), trainable=trainable, relu=relu,
+                      mirror_pad=mirror_pad, collection=collection)
 
 
 def res_layer(x, filter_size=None, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
