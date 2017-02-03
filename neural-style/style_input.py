@@ -29,4 +29,3 @@ def style_input(train_image_dir, batch_size, min_after_dequeue=5, read_threads=1
                                          capacity=capacity, num_threads=read_threads, min_after_dequeue=min_after_dequeue)
 
     return train_batch
-

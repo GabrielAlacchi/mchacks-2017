@@ -42,6 +42,9 @@ def main(argv):
 
     art_image = cv2.imread(FLAGS.art_image)
 
+    # Open CV works with BGR but we can't have it... We can't have it...... Can't have it **shrugs**
+    art_image = cv2.cvtColor(art_image, code=cv2.COLOR_BGR2RGB)
+
     style_weights = tf.constant([1.0], dtype=tf.float32, name='style_weights')
 
     with tf.Session() as sess:
@@ -61,7 +64,7 @@ def main(argv):
             model = u_net.create_model(train_example_batch, style_weights, trainable=True)
 
         print "Initializing unet variables"
-        u_net.init_all_variables(sess)
+        sess.run(u_net.variables_initializer())
 
         print "Initializing vgg"
         with tf.variable_scope('vgg'):
@@ -79,7 +82,8 @@ def main(argv):
 
         feature_matrices = map(lambda layer: art.feature_matrix(layer), content_layer_ops)
 
-        loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices)
+        loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
+                              total_variation=False)
 
         unet_variables = tf.get_collection(unet.UNET_COLLECTION)
         with tf.name_scope('weight_summaries'):
