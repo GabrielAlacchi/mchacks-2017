@@ -7,11 +7,33 @@ import sys
 import cv2
 from ops import tensor_size
 
-ALPHA = 1e-5
-BETA = 1e-2
-TV_WEIGHT = 1e-2
+ALPHA = 1.0
+BETA = 1e-3
+TV_WEIGHT = 1e2
 
-LEARNING_RATE = 5.0
+LEARNING_RATE = 10
+MAX_STEPS = 550
+
+if __name__ == "__main__":
+    # Set up flags
+    flags = tf.app.flags
+
+    flags.DEFINE_float('alpha', ALPHA, 'Alpha: training parameter (content weighting)')
+    flags.DEFINE_float('beta', BETA, 'Beta: training parameter (style weighting)')
+    flags.DEFINE_float('tv_weight', TV_WEIGHT, 'TV Weight: Total variation loss weighting')
+
+    flags.DEFINE_float('learning_rate', LEARNING_RATE, 'Learning rate')
+    flags.DEFINE_integer('max_steps', MAX_STEPS, 'Number of steps to train for.')
+
+    flags.DEFINE_string('content_layers', 'conv2_2', 'Content layers, comma delimited')
+    flags.DEFINE_string('style_layers', 'conv1_2,conv2_2,conv3_3,conv4_3', 'Style layers, comma delimited')
+
+    flags.DEFINE_string('style_image', 'images/mosaic.jpg', 'Image to draw style from')
+    flags.DEFINE_string('input_image', 'images/gabriel.jpg', 'Image to transfer style onto')
+
+    flags.DEFINE_string('logdir', 'logdir', 'Place to write summaries too.')
+
+    FLAGS = flags.FLAGS
 
 
 def feature_matrix(layer):
@@ -41,8 +63,9 @@ def gram_matrix(feature):
 def content_loss(layer, p_l):
 
     f_l = feature_matrix(layer)
-
-    return tf.reduce_mean(0.5 * tf.reduce_sum((f_l - p_l) ** 2, reduction_indices=[1, 2]), axis=0)
+    shape = tf.shape(f_l)
+    multiplier = 1.0 / tf.cast(shape[1] * shape[2], dtype=tf.float32)
+    return tf.reduce_mean(tf.reduce_sum(multiplier * (f_l - p_l) ** 2, reduction_indices=[1, 2]), axis=0)
 
 
 def style_loss(layer, a_l):
@@ -53,7 +76,8 @@ def style_loss(layer, a_l):
 
 
 def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices,
-               alpha=ALPHA, beta=BETA, total_variation=True):
+               alpha=ALPHA, beta=BETA, tv_weight=TV_WEIGHT, total_variation=True,
+               summaries=False, summary_scope='summaries'):
 
     shape = tf.shape(image)
 
@@ -72,7 +96,7 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
         # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
         tv_y_size = tensor_size(image[:, 1:, :, :])
         tv_x_size = tensor_size(image[:, :, 1:, :])
-        tv_loss = TV_WEIGHT * 2 * (
+        tv_loss = 2 * (
             (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
              tf.cast(tv_y_size, tf.float32)) +
             (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
@@ -80,7 +104,20 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
     else:
         tv_loss = tf.constant(0.0, dtype=tf.float32)
 
-    return total_content_loss * alpha + beta * total_style_loss + tv_loss
+    total_content_loss *= alpha
+    total_style_loss *= beta
+    tv_loss *= tv_weight
+
+    loss = total_content_loss + total_style_loss + tv_loss
+
+    if summaries:
+        with tf.name_scope(summary_scope):
+            tf.summary.scalar('Content Loss', total_content_loss)
+            tf.summary.scalar('Style Loss', total_style_loss)
+            tf.summary.scalar('Total Variation Loss', tv_loss)
+            tf.summary.scalar('Total Loss', loss)
+
+    return loss
 
 
 def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_image):
@@ -127,8 +164,11 @@ def precompute(style_layers, content_layers, vgg_scope, sess, user_image, art_im
 
 def main(argv):
 
-    art_image = cv2.imread('images/starry_night.jpg')
-    user_image = cv2.imread('images/trump.jpg')
+    art_image = cv2.imread(FLAGS.style_image)
+    user_image = cv2.imread(FLAGS.input_image)
+
+    art_image = cv2.cvtColor(art_image, cv2.COLOR_BGR2RGB)
+    user_image = cv2.cvtColor(user_image, cv2.COLOR_BGR2RGB)
 
     image_shape = user_image.shape
 
@@ -141,33 +181,48 @@ def main(argv):
         download_weights_maybe('weights/vgg16_weights.npz')
         vgg.load_weights('weights/vgg16_weights.npz', sess)
 
-    style_layers = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1']
-    content_layers = ['conv3_2', 'conv4_2']
+    style_layers = FLAGS.style_layers.split(',')
+    content_layers = FLAGS.content_layers.split(',')
 
     feature_matrices, gram_matrices = precompute(style_layers, content_layers, vgg_scope='vgg', sess=sess, user_image=user_image, art_image=art_image)
 
     content_layer_ops = map(lambda layer: vgg.get_layer(layer), content_layers)
     style_layer_ops = map(lambda layer: vgg.get_layer(layer), style_layers)
 
-    loss = total_loss(image, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices)
+    loss = total_loss(image, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
+                      alpha=FLAGS.alpha, beta=FLAGS.beta, tv_weight=FLAGS.tv_weight, total_variation=True,
+                      summaries=True, summary_scope='summaries')
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss)
+    global_step = tf.Variable(0, trainable=False, name='global_step', collections=[tf.GraphKeys.GLOBAL_STEP])
 
-    global_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+    optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate).minimize(loss, global_step=global_step)
 
-    sess.run(tf.variables_initializer(global_vars))
+    sess.run(tf.global_variables_initializer())
+    sess.run(tf.variables_initializer([global_step]))
 
-    for step in xrange(550):
+    merged_summaries = tf.summary.merge_all()
+    summary_writer = tf.summary.FileWriter(logdir=FLAGS.logdir)
+
+    step = 0
+    while step < FLAGS.max_steps:
+
+        step = sess.run(global_step)
         sys.stdout.flush()
         sys.stdout.write('\r Step %i' % step)
 
-        sess.run(optimizer)
+        summary, _ = sess.run([merged_summaries, optimizer])
+        summary_writer.add_summary(summary, step)
+
         if step % 50 == 0:
             print "\rLoss for step %i: %f" % (step, sess.run(loss))
-            cv2.imwrite('images/result.png', sess.run(image).reshape(image_shape))
+            cv2.imwrite('images/result.png',
+                        cv2.cvtColor(sess.run(image).reshape(image_shape),
+                                     cv2.COLOR_RGB2BGR))
 
-    print 'Final Loss: %f' % sess.run(loss)
-    cv2.imwrite('images/result.png', sess.run(image).reshape(image_shape))
+    print '\rFinal Loss: %f' % sess.run(loss)
+    cv2.imwrite('images/result.png',
+                cv2.cvtColor(sess.run(image).reshape(image_shape),
+                             cv2.COLOR_RGB2BGR))
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    tf.app.run(main)

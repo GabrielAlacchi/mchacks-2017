@@ -17,7 +17,19 @@ def main(argv):
 
     image = cv2.imread(FLAGS.input_image)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, dsize=(348, 348))
+
+    im_shape = list(image.shape)
+    resize = False
+    if im_shape[0] % 4 != 0:
+        im_shape[0] -= - im_shape[0] % 4
+        resize = True
+    if im_shape[1] % 4 != 0:
+        im_shape[1] -= im_shape[1] % 4
+        resize = True
+
+    if resize:
+        image = cv2.resize(image, dsize=tuple(im_shape[:2]))
+
     image_tens = tf.expand_dims(tf.constant(image, dtype=tf.float32), axis=0)
     style_weights = tf.constant([1.0], dtype=tf.float32)
 
@@ -26,9 +38,6 @@ def main(argv):
         model = net.create_model(image_tens, style_weights, trainable=False)
 
     with tf.Session() as sess:
-
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         checkpoints = tf.train.get_checkpoint_state(FLAGS.logdir)
         unet_variables = tf.get_collection(unet.UNET_COLLECTION)
@@ -40,9 +49,6 @@ def main(argv):
 
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
         cv2.imwrite('images/result.jpg', output)
-
-        coord.request_stop()
-        coord.join(threads)
 
 
 if __name__ == "__main__":

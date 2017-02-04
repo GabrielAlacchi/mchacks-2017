@@ -32,8 +32,9 @@ flags.DEFINE_float('adam_epsilon', 1e-8, 'Epsilon for Adam Optimizer.')
 
 # Style parameters
 flags.DEFINE_string('art_image', 'images/the_starry_night.jpg', 'The Image to Train Style for.')
-flags.DEFINE_float('content_alpha', 1e-5, 'The weight for the content loss in the total loss.')
-flags.DEFINE_float('style_beta', 1e-2, 'The weight for the style loss in the total loss.')
+flags.DEFINE_float('content_alpha', art.ALPHA, 'The weight for the content loss in the total loss.')
+flags.DEFINE_float('style_beta', art.BETA, 'The weight for the style loss in the total loss.')
+flags.DEFINE_float('tv_weight', art.TV_WEIGHT, 'The weight for the total variation in the total loss.')
 
 FLAGS = flags.FLAGS
 
@@ -71,8 +72,8 @@ def main(argv):
             vgg = vgg16(model, reuse=False)
             vgg.load_weights('weights/vgg16_weights.npz', sess)
 
-        style_layers = ['conv1_1', 'conv2_1', 'conv3_1', 'conv4_1']
-        content_layers = ['conv3_2']
+        style_layers = ['conv1_2', 'conv2_2', 'conv3_3', 'conv4_3']
+        content_layers = ['conv2_2']
 
         # Get the gram matrices for the image (they are tf constants)
         _, gram_matrices = art.precompute(style_layers, [], art_image=art_image, user_image=None, vgg_scope='vgg', sess=sess)
@@ -83,16 +84,14 @@ def main(argv):
         feature_matrices = map(lambda layer: art.feature_matrix(layer), content_layer_ops)
 
         loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
-                              total_variation=False)
+                              alpha=FLAGS.content_alpha, beta=FLAGS.style_beta,
+                              tv_weight=FLAGS.tv_weight, total_variation=True,
+                              summaries=True, summary_scope='summaries')
 
         unet_variables = tf.get_collection(unet.UNET_COLLECTION)
         with tf.name_scope('weight_summaries'):
             print "Creating Variable Summaries..."
             map(ops.variable_summaries, unet_variables)
-
-        with tf.name_scope('summaries'):
-            print "Creating Loss Summary..."
-            tf.summary.scalar('Total Loss', loss)
 
         global_step = tf.Variable(0, trainable=False, name='global_step')
 
