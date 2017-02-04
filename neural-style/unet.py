@@ -32,12 +32,15 @@ class UNet:
 
         with tf.variable_scope('res_1', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
+            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
 
         with tf.variable_scope('res_2', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
+            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
 
         with tf.variable_scope('res_3', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
+            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
 
         with tf.variable_scope('upsample_1', reuse=reuse):
             model = ops.upsample(model, filter_size=(3, 3), num_features=64, trainable=trainable,
