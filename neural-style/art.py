@@ -80,36 +80,41 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
                alpha=ALPHA, beta=BETA, tv_weight=TV_WEIGHT, total_variation=True,
                summaries=False, summary_scope='summaries'):
 
-    shape = tf.shape(image)
+    with tf.name_scope('loss'):
+        with tf.name_scope('content_loss'):
+            total_content_loss = tf.constant(0.0, dtype=tf.float32)
+            for layer, feature in zip(content_layers, feature_matrices):
+                total_content_loss = total_content_loss + content_loss(layer, p_l=feature)
 
-    total_content_loss = tf.constant(0.0, dtype=tf.float32)
-    for layer, feature in zip(content_layers, feature_matrices):
-        total_content_loss = total_content_loss + content_loss(layer, p_l=feature)
+            total_content_loss = tf.div(total_content_loss, len(content_layers), name='content_loss')
 
-    total_style_loss = tf.constant(0.0, dtype=tf.float32)
-    for layer, gram in zip(style_layers, gram_matrices):
-        total_style_loss = total_style_loss + style_loss(layer, a_l=gram)
+        with tf.name_scope('style_loss'):
+            total_style_loss = tf.constant(0.0, dtype=tf.float32)
+            for layer, gram in zip(style_layers, gram_matrices):
+                total_style_loss = total_style_loss + style_loss(layer, a_l=gram)
 
-    total_content_loss /= len(content_layers)
-    total_style_loss /= len(style_layers)
+            total_style_loss = tf.div(total_style_loss, len(style_layers), name='style_loss')
 
-    if total_variation:
-        # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
-        tv_y_size = tensor_size(image[:, 1:, :, :])
-        tv_x_size = tensor_size(image[:, :, 1:, :])
-        tv_loss = 2 * (
-            (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
-             tf.cast(tv_y_size, tf.float32)) +
-            (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
-             tf.cast(tv_x_size, tf.float32)))
-    else:
-        tv_loss = tf.constant(0.0, dtype=tf.float32)
+        with tf.name_scope('tv_loss'):
+            if total_variation:
+                shape = tf.shape(image)
 
-    total_content_loss *= alpha
-    total_style_loss *= beta
-    tv_loss *= tv_weight
+                # Total Variation Denoising (IDK WHAT THIS DOES DON'T ASK ME)
+                tv_y_size = tensor_size(image[:, 1:, :, :])
+                tv_x_size = tensor_size(image[:, :, 1:, :])
+                tv_loss = 2 * (
+                    (tf.nn.l2_loss(image[:, 1:, :, :] - image[:, :shape[1] - tf.constant(1, dtype=tf.int32), :, :]) /
+                     tf.cast(tv_y_size, tf.float32)) +
+                    (tf.nn.l2_loss(image[:, :, 1:, :] - image[:, :, :shape[2] - tf.constant(1, dtype=tf.int32), :]) /
+                     tf.cast(tv_x_size, tf.float32)))
+            else:
+                tv_loss = tf.constant(0.0, dtype=tf.float32)
 
-    loss = total_content_loss + total_style_loss + tv_loss
+        total_content_loss = tf.mul(total_content_loss, alpha, name='scaled_content_loss')
+        total_style_loss = tf.mul(total_style_loss, beta, name='scaled_content_loss')
+        tv_loss = tf.mul(tv_loss, tv_weight, name='scaled_tv_loss')
+
+        loss = tf.add(total_content_loss, total_style_loss + tv_loss, name='total_loss')
 
     if summaries:
         with tf.name_scope(summary_scope):

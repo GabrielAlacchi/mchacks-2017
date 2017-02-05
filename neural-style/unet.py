@@ -35,12 +35,17 @@ class UNet:
                                                   trainable=trainable,
                                                   collection=UNET_COLLECTION)
 
-        with tf.variable_scope('conv1_1', reuse=reuse):
-            model = conv1_1 = ops.conv_layer(x, filter_size=(3, 3), num_features=32, strides=(1, 1),
-                                             trainable=trainable, collection=UNET_COLLECTION)
+        with tf.variable_scope('conv1_1'):
+            model = ops.conv_layer(x, filter_size=(5, 5), num_features=32, strides=(1, 1),
+                                   trainable=trainable, collection=UNET_COLLECTION)
             model = _norm(model)
 
         with tf.variable_scope('conv1_2', reuse=reuse):
+            model = conv1_1 = ops.conv_layer(model, filter_size=(3, 3), num_features=32, strides=(1, 1),
+                                             trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
+
+        with tf.variable_scope('downsample_1', reuse=reuse):
             model = ops.conv_layer(model, filter_size=(3, 3), num_features=64, strides=(2, 2),
                                    trainable=trainable, collection=UNET_COLLECTION)
             model = _norm(model)
@@ -50,7 +55,7 @@ class UNet:
                                              trainable=trainable, collection=UNET_COLLECTION)
             model = _norm(model)
 
-        with tf.variable_scope('conv2_2', reuse=reuse):
+        with tf.variable_scope('downsample_2', reuse=reuse):
             model = ops.conv_layer(model, filter_size=(3, 3), num_features=128, strides=(2, 2),
                                    trainable=trainable, collection=UNET_COLLECTION)
             model = _norm(model)
@@ -64,6 +69,14 @@ class UNet:
             model = _norm(model)
 
         with tf.variable_scope('res_3', reuse=reuse):
+            model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
+
+        with tf.variable_scope('res_4', reuse=reuse):
+            model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
+
+        with tf.variable_scope('res_5', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
             model = _norm(model)
 

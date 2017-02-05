@@ -44,21 +44,28 @@ flags.DEFINE_float('tv_weight', art.TV_WEIGHT, 'The weight for the total variati
 FLAGS = flags.FLAGS
 
 
+def gram_stack(layer_tuple):
+    layer_name, layer_matrices = layer_tuple
+    with tf.name_scope(layer_name):
+        return tf.stack(layer_matrices, axis=0, name='gram_matrices')
+
+
 def stack_gram_matrices(art_images, art_list, style_layers, vgg_scope, sess):
 
-    # Create a list of empty lists the size of style_layers
-    gram_layer_list = [[] for _ in style_layers]
-    for art_image, art_name in zip(art_images, art_list):
-        # Precompute the gram matrices for this art_image
-        print "Computing gram matrices for %s" % art_name
-        _, gram_matrices = art.precompute(style_layers, [],
-                                          art_image=art_image, user_image=None,
-                                          vgg_scope=vgg_scope, sess=sess)
-        for i, matrix in enumerate(gram_matrices):
-            gram_layer_list[i].append(matrix)
+    with tf.name_scope('gram_matrices'):
+        # Create a list of empty lists the size of style_layers
+        gram_layer_list = [[] for _ in style_layers]
+        for art_image, art_name in zip(art_images, art_list):
+            # Precompute the gram matrices for this art_image
+            print "Computing gram matrices for %s" % art_name
+            _, gram_matrices = art.precompute(style_layers, [],
+                                              art_image=art_image, user_image=None,
+                                              vgg_scope=vgg_scope, sess=sess)
+            for i, matrix in enumerate(gram_matrices):
+                gram_layer_list[i].append(matrix)
 
-    # Create stacks out of each layer
-    return map(lambda matrices: tf.stack(matrices, axis=0), gram_layer_list)
+        # Create stacks out of each layer
+        return map(gram_stack,  zip(style_layers, gram_layer_list))
 
 
 def main(argv):
