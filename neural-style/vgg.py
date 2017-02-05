@@ -22,10 +22,14 @@ class vgg16:
     def convlayers(self, reuse=False):
         self.parameters = []
 
+        with tf.variable_scope('preprocess', reuse=reuse) as scope:
+            mean = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32, shape=[1, 1, 1, 3], name='img_mean')
+            images = self.imgs - mean
+
         # conv1_1
         with tf.variable_scope('conv1_1', reuse=reuse) as scope:
             kernel = kernel_variable('weights', shape=[3, 3, 3, 64],  trainable=False, collection='VGG_weights')
-            conv = tf.nn.conv2d(self.imgs, kernel, [1, 1, 1, 1], padding='SAME')
+            conv = tf.nn.conv2d(images, kernel, [1, 1, 1, 1], padding='SAME')
             biases = bias_variable('biases', shape=[64], trainable=False, collection='VGG_weights')
             out = tf.nn.bias_add(conv, biases)
             self.conv1_1 = tf.nn.relu(out, name=scope.name)

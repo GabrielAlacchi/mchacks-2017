@@ -1,5 +1,7 @@
 *.npz
-checkpoint
+mosaic
+starry-night
 events*
 *.data*
 *.index
+*.json

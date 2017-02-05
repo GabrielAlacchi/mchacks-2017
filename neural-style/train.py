@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import unet
 import tensorflow as tf
@@ -69,8 +70,12 @@ def main(argv):
 
         print "Initializing vgg"
         with tf.variable_scope('vgg'):
-            vgg = vgg16(model, reuse=False)
-            vgg.load_weights('weights/vgg16_weights.npz', sess)
+            vgg_model = vgg16(model, reuse=False)
+            vgg_model.load_weights('weights/vgg16_weights.npz', sess)
+
+        # Re use the vgg model to get the content feature matrices
+        with tf.variable_scope('vgg'):
+            vgg_batch = vgg16(train_example_batch, reuse=True)
 
         style_layers = ['conv1_2', 'conv2_2', 'conv3_3', 'conv4_3']
         content_layers = ['conv2_2']
@@ -78,11 +83,14 @@ def main(argv):
         # Get the gram matrices for the image (they are tf constants)
         _, gram_matrices = art.precompute(style_layers, [], art_image=art_image, user_image=None, vgg_scope='vgg', sess=sess)
 
-        content_layer_ops = map(lambda layer: vgg.get_layer(layer), content_layers)
-        style_layer_ops = map(lambda layer: vgg.get_layer(layer), style_layers)
+        # Get the style and content ops from the vgg instance running on top of the UNet model.
+        content_layer_ops = map(lambda layer: vgg_model.get_layer(layer), content_layers)
+        style_layer_ops = map(lambda layer: vgg_model.get_layer(layer), style_layers)
 
-        feature_matrices = map(lambda layer: art.feature_matrix(layer), content_layer_ops)
+        # Get the feature matrices of the training batch operation
+        feature_matrices = map(lambda layer: art.feature_matrix(vgg_batch.get_layer(layer)), content_layers)
 
+        # Compute the total loss, including summaries
         loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
                               alpha=FLAGS.content_alpha, beta=FLAGS.style_beta,
                               tv_weight=FLAGS.tv_weight, total_variation=True,
@@ -146,6 +154,9 @@ def main(argv):
         finally:
             coord.request_stop()
             coord.join(threads)
+
+        print "\rDone training"
+        print "Exporting meta graph and final checkpoint..."
 
         saver.save(sess, path.join(FLAGS.logdir, FLAGS.model_name + '.ckpt'), global_step=global_step, write_meta_graph=True)
 

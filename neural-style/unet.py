@@ -1,58 +1,83 @@
 
 import tensorflow as tf
 import ops
-import numpy as np
 
 UNET_COLLECTION = 'unet_collection'
 
 
 class UNet:
 
-    def create_model(self, x, style_weights, trainable=False, reuse=False):
+    def create_model(self, x, num_styles, sliced=False, style_index=None,
+                     style_weights=None, trainable=False, reuse=False):
+        """
+        Creates the UNet model
+        :param x: The input tensor (batch, height, width, depth)
+        :param num_styles: The number of styles to train the model for
+        :param sliced: Whether to apply sliced instance norm or weighted instance norm
+        :param style_index: A tensor specifying the index of style to use (Necessary if using condiitonal = True)
+        :param style_weights: A tensor specifying the style weights (Necessary if using conditional = False)
+        :param trainable: Whether or not the variables should be trainable
+        :param reuse: Whether or not to reuse the scoped variables
+        :return: A tensor with the output image batch of the model
+        """
+
+        if style_weights is not None:
+            style_weights = tf.expand_dims(style_weights, axis=1, name='expanded_style_weights')
+
+        # Decides which normalization op to use (sliced is for a single style) (model is for blending styles)
+        def _norm(_input):
+            if sliced:
+                return ops.sliced_instance_norm(_input, style_index, num_styles=num_styles,
+                                                trainable=trainable,
+                                                collection=UNET_COLLECTION)
+            else:
+                return ops.weighted_instance_norm(_input, style_weights,
+                                                  trainable=trainable,
+                                                  collection=UNET_COLLECTION)
 
         with tf.variable_scope('conv1_1', reuse=reuse):
             model = conv1_1 = ops.conv_layer(x, filter_size=(3, 3), num_features=32, strides=(1, 1),
                                              trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('conv1_2', reuse=reuse):
             model = ops.conv_layer(model, filter_size=(3, 3), num_features=64, strides=(2, 2),
                                    trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('conv2_1', reuse=reuse):
             model = conv2_1 = ops.conv_layer(model, filter_size=(3, 3), num_features=64, strides=(1, 1),
                                              trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('conv2_2', reuse=reuse):
             model = ops.conv_layer(model, filter_size=(3, 3), num_features=128, strides=(2, 2),
                                    trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('res_1', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('res_2', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('res_3', reuse=reuse):
             model = ops.res_layer(model, filter_size=(3, 3), trainable=trainable, collection=UNET_COLLECTION)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('upsample_1', reuse=reuse):
             model = ops.upsample(model, filter_size=(3, 3), num_features=64, trainable=trainable,
                                  upscale=2, collection=UNET_COLLECTION)
             model = tf.concat(values=[conv2_1, model], concat_dim=3)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('upsample_2', reuse=reuse):
             model = ops.upsample(model, filter_size=(3, 3), num_features=32, trainable=trainable,
                                  upscale=2, collection=UNET_COLLECTION)
             model = tf.concat(values=[conv1_1, model], concat_dim=3)
-            model = ops.weighted_instance_norm(model, style_weights, trainable=trainable, collection=UNET_COLLECTION)
+            model = _norm(model)
 
         with tf.variable_scope('conv_output', reuse=reuse):
             model = ops.conv_layer(model, filter_size=(3, 3), num_features=3, strides=(1, 1), relu=False,
@@ -60,6 +85,13 @@ class UNet:
             model = 255.0 * tf.nn.sigmoid(model, name='activation')
 
         return model
+
+    def restore_partial(self, checkpoint_file, sess):
+        variables_to_restore = [var for var in tf.get_collection(UNET_COLLECTION)
+                                if 'gamma' not in var.name and 'beta' not in var.name]
+        saver = tf.train.Saver(variables_to_restore)
+        print "Restoring weights from %s" % checkpoint_file
+        saver.restore(sess, checkpoint_file)
 
     def variables_initializer(self):
         return tf.variables_initializer(tf.get_collection(UNET_COLLECTION))

@@ -3,12 +3,13 @@ import tensorflow as tf
 import numpy as np
 import unet
 import cv2
-from scipy.misc import imsave
 
 flags = tf.app.flags
 
 flags.DEFINE_string('logdir', 'logdir', 'Logdir where checpoints can be found')
-flags.DEFINE_string('input_image', 'images/gabriel.jpg', 'Image to stylize')
+flags.DEFINE_string('input_image', 'images/montreal.jpg', 'Image to stylize')
+flags.DEFINE_string('outfile', 'images/result.jpg', 'Output file')
+flags.DEFINE_string('style_weights', '1.0,0.0', 'Style weights to use')
 
 FLAGS = flags.FLAGS
 
@@ -21,21 +22,24 @@ def main(argv):
     im_shape = list(image.shape)
     resize = False
     if im_shape[0] % 4 != 0:
-        im_shape[0] -= - im_shape[0] % 4
+        im_shape[0] -= im_shape[0] % 4
         resize = True
     if im_shape[1] % 4 != 0:
         im_shape[1] -= im_shape[1] % 4
         resize = True
 
     if resize:
-        image = cv2.resize(image, dsize=tuple(im_shape[:2]))
+        image = cv2.resize(image, dsize=(im_shape[1], im_shape[0]))
 
     image_tens = tf.expand_dims(tf.constant(image, dtype=tf.float32), axis=0)
-    style_weights = tf.constant([1.0], dtype=tf.float32)
+
+    style_weight_list = map(float, FLAGS.style_weights.split(','))
+
+    style_weights = tf.constant(style_weight_list, dtype=tf.float32)
 
     with tf.variable_scope('unet'):
         net = unet.UNet()
-        model = net.create_model(image_tens, style_weights, trainable=False)
+        model = net.create_model(image_tens, len(style_weight_list), style_weights=style_weights, trainable=False)
 
     with tf.Session() as sess:
 
@@ -48,7 +52,7 @@ def main(argv):
         output = np.squeeze(output)
 
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
-        cv2.imwrite('images/result.jpg', output)
+        cv2.imwrite(FLAGS.outfile, output)
 
 
 if __name__ == "__main__":

@@ -146,7 +146,7 @@ def weighted_instance_norm(x, style_weights, trainable=True, collection=tf.Graph
         collection: The tensorflow collection to put the variables in.
     """
 
-    num_styles = style_weights.get_shape()[-1:]
+    num_styles = style_weights.get_shape()[0:1]
     params_shape = x.get_shape()[-1:]
 
     # Create a shape that is a matrix with (num_styles, depth) in dimension
@@ -166,6 +166,41 @@ def weighted_instance_norm(x, style_weights, trainable=True, collection=tf.Graph
 
     gamma = tf.reduce_sum(gamma * style_weights, axis=0, name='style_weighted_gamma')
     beta = tf.reduce_sum(beta * style_weights, axis=0, name='style_weighted_beta')
+
+    return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
+
+
+def sliced_instance_norm(x, style_index, num_styles, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+    """Instance normalization with weighted style_weightings
+
+    Args:
+        x: A tensor with (batch, height, width, depth) dimensions.
+        style_index: A tensorflow scalar index which indicates which style to use.
+        trainable: Whether or not to have the variables to be trainable.
+        num_styles: The number of styles to model
+        collection: The tensorflow collection to put the variables in.
+    """
+
+    params_shape = x.get_shape()[-1:]
+
+    # Create a shape that is a mtarix with (num_styles, depth)
+    var_shape = tf.TensorShape([num_styles]).concatenate(params_shape)
+
+    gamma = tf.get_variable('gamma',
+                            initializer=tf.ones(shape=var_shape, dtype=tf.float32),
+                            trainable=trainable,
+                            dtype=tf.float32,
+                            collections=[collection])
+
+    beta = tf.get_variable('beta',
+                           initializer=tf.zeros(shape=var_shape, dtype=tf.float32),
+                           trainable=trainable,
+                           dtype=tf.float32,
+                           collections=[collection])
+
+    # Slice to the style_index
+    gamma = gamma[style_index]
+    beta = beta[style_index]
 
     return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
 

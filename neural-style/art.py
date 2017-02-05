@@ -7,9 +7,10 @@ import sys
 import cv2
 from ops import tensor_size
 
-ALPHA = 1.0
+# Default hyper parameters
+ALPHA = 1e-1
 BETA = 1e-3
-TV_WEIGHT = 1e2
+TV_WEIGHT = 1.0
 
 LEARNING_RATE = 10
 MAX_STEPS = 550
