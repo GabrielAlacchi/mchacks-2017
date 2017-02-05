@@ -115,7 +115,8 @@ def total_loss(image, content_layers, style_layers, feature_matrices, gram_matri
         with tf.name_scope(summary_scope):
             tf.summary.scalar('Content Loss', total_content_loss)
             tf.summary.scalar('Style Loss', total_style_loss)
-            tf.summary.scalar('Total Variation Loss', tv_loss)
+            if total_variation:
+                tf.summary.scalar('Total Variation Loss', tv_loss)
             tf.summary.scalar('Total Loss', loss)
 
     return loss

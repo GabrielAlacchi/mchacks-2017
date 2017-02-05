@@ -1,7 +1,8 @@
 *.npz
 mosaic
-starry-night
+painter
 events*
 *.data*
 *.index
 *.json
+checkpoint

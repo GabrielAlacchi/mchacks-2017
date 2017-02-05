@@ -22,6 +22,7 @@ flags.DEFINE_integer('report_step', 100, 'Step to report loss at')
 flags.DEFINE_integer('style_swap', 100, 'Step to switch styles for')
 flags.DEFINE_integer('save_step', 1000, 'Step to save a checkpoint at')
 flags.DEFINE_float('learning_rate', 1e-3, 'Learning Rate.')
+flags.DEFINE_boolean('log_style_index', False, 'Output the style index.')
 flags.DEFINE_string('image_dir', 'data/img', 'Root where the test and train sub directories can be found')
 
 # Tensorflow output
@@ -143,7 +144,7 @@ def main(argv):
         # Compute the total loss, including summaries
         loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
                               alpha=FLAGS.content_alpha, beta=FLAGS.style_beta,
-                              tv_weight=FLAGS.tv_weight, total_variation=True,
+                              tv_weight=FLAGS.tv_weight, total_variation=False,
                               summaries=True, summary_scope='summaries')
 
         unet_variables = tf.get_collection(unet.UNET_COLLECTION)
@@ -196,7 +197,7 @@ def main(argv):
 
                 sys.stdout.flush()
                 sys.stdout.write('\r Step: %d' % step)
-                if (step - 1) % FLAGS.style_swap == 0:
+                if FLAGS.log_style_index and (step - 1) % FLAGS.style_swap == 0:
                     print "\rStyle Index: %d" % sess.run(style_index)
                 if (step - 1) % FLAGS.report_step == 0:
                     loss_val = sess.run(loss)

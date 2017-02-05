@@ -3,13 +3,15 @@ import tensorflow as tf
 import numpy as np
 import unet
 import cv2
+import simplejson as json
+from os import path
 
 flags = tf.app.flags
 
 flags.DEFINE_string('logdir', 'logdir', 'Logdir where checpoints can be found')
 flags.DEFINE_string('input_image', 'images/montreal.jpg', 'Image to stylize')
 flags.DEFINE_string('outfile', 'images/result.jpg', 'Output file')
-flags.DEFINE_string('style_weights', '1.0,0.0', 'Style weights to use')
+flags.DEFINE_integer('style_index', 0, 'Style index to use.')
 
 FLAGS = flags.FLAGS
 
@@ -18,6 +20,19 @@ def main(argv):
 
     image = cv2.imread(FLAGS.input_image)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    with open(path.join(FLAGS.logdir, 'art_index.json')) as f:
+        art_index = json.load(f)
+
+    num_styles = len(art_index.keys())
+    style_index = FLAGS.style_index
+
+    style_name_list = filter(lambda item: item[1] == style_index, art_index.iteritems())
+    if len(style_name_list) != 1:
+        print "Style index not in the model %d" % style_index
+        exit(-1)
+    else:
+        print "Using style %s" % style_name_list[0][0]
 
     im_shape = list(image.shape)
     resize = False
@@ -33,13 +48,14 @@ def main(argv):
 
     image_tens = tf.expand_dims(tf.constant(image, dtype=tf.float32), axis=0)
 
-    style_weight_list = map(float, FLAGS.style_weights.split(','))
+    style_weight_list = [0.0 for _ in xrange(num_styles)]
+    style_weight_list[style_index] = 1.0
 
     style_weights = tf.constant(style_weight_list, dtype=tf.float32)
 
     with tf.variable_scope('unet'):
         net = unet.UNet()
-        model = net.create_model(image_tens, len(style_weight_list), style_weights=style_weights, trainable=False)
+        model = net.create_model(image_tens, num_styles, style_weights=style_weights, trainable=False)
 
     with tf.Session() as sess:
 
