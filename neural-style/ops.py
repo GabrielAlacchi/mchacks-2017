@@ -170,18 +170,24 @@ def weighted_instance_norm(x, style_weights, trainable=True, collection=tf.Graph
     return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
 
 
-def sliced_instance_norm(x, style_index, num_styles, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
-    """Instance normalization with weighted style_weightings
+def conditional_instance_norm(x, style_indices, num_styles, trainable=True, collection=tf.GraphKeys.GLOBAL_VARIABLES):
+    """Instance normalization with conditional offset and scale
 
     Args:
         x: A tensor with (batch, height, width, depth) dimensions.
-        style_index: A tensorflow scalar index which indicates which style to use.
+        style_indices: A tensorflow tensor which indicates the style indices to use, must be the same size as the batch_size.
         trainable: Whether or not to have the variables to be trainable.
         num_styles: The number of styles to model
         collection: The tensorflow collection to put the variables in.
     """
 
     params_shape = x.get_shape()[-1:]
+
+    batch_shape = x.get_shape().as_list()[0]
+    style_index_shape = style_indices.get_shape().as_list()[0]
+
+    if batch_shape is not None and style_index_shape is not None and batch_shape != style_index_shape:
+        raise ValueError("The style index tensor size must match the batch size!")
 
     # Create a shape that is a mtarix with (num_styles, depth)
     var_shape = tf.TensorShape([num_styles]).concatenate(params_shape)
@@ -198,9 +204,9 @@ def sliced_instance_norm(x, style_index, num_styles, trainable=True, collection=
                            dtype=tf.float32,
                            collections=[collection])
 
-    # Slice to the style_index
-    gamma = gamma[style_index]
-    beta = beta[style_index]
+    # Gather according to the style indices
+    gamma = tf.gather(gamma, style_indices, name='conditional_scale')
+    beta = tf.gather(beta, style_indices, name='conditional_offset')
 
     return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
 

@@ -19,10 +19,8 @@ flags.DEFINE_integer('batch_size', 3, 'Batch Size.')
 flags.DEFINE_integer('epochs', 2, 'Training Epochs.')
 flags.DEFINE_integer('max_steps', 40000, 'Max training steps. -1 for epoch based training')
 flags.DEFINE_integer('report_step', 100, 'Step to report loss at')
-flags.DEFINE_integer('style_swap', 100, 'Step to switch styles for')
 flags.DEFINE_integer('save_step', 1000, 'Step to save a checkpoint at')
 flags.DEFINE_float('learning_rate', 1e-3, 'Learning Rate.')
-flags.DEFINE_boolean('log_style_index', False, 'Output the style index.')
 flags.DEFINE_string('image_dir', 'data/img', 'Root where the test and train sub directories can be found')
 
 # Tensorflow output
@@ -44,13 +42,14 @@ flags.DEFINE_float('tv_weight', art.TV_WEIGHT, 'The weight for the total variati
 FLAGS = flags.FLAGS
 
 
-def gram_stack(layer_tuple):
+def gram_stack(layer_tuple, style_indices):
     layer_name, layer_matrices = layer_tuple
     with tf.name_scope(layer_name):
-        return tf.stack(layer_matrices, axis=0, name='gram_matrices')
+        stack = tf.stack(layer_matrices, axis=0, name='gram_matrices')
+        return tf.gather(stack, style_indices, name='indexed_gram_matrices')
 
 
-def stack_gram_matrices(art_images, art_list, style_layers, vgg_scope, sess):
+def stack_gram_matrices(art_images, art_list, style_layers, style_indices, vgg_scope, sess):
 
     with tf.name_scope('gram_matrices'):
         # Create a list of empty lists the size of style_layers
@@ -64,8 +63,9 @@ def stack_gram_matrices(art_images, art_list, style_layers, vgg_scope, sess):
             for i, matrix in enumerate(gram_matrices):
                 gram_layer_list[i].append(matrix)
 
-        # Create stacks out of each layer
-        return map(gram_stack,  zip(style_layers, gram_layer_list))
+        # Create stacks out of each layer, and gather the corresponding indices by label
+        return map(lambda layer_tuple: gram_stack(layer_tuple, style_indices),
+                   zip(style_layers, gram_layer_list))
 
 
 def main(argv):
@@ -102,21 +102,17 @@ def main(argv):
         train_image_dir = path.join(FLAGS.image_dir, 'train2014')
 
         # Get the symbolic COCO input tensors
-        train_batch = style_input(train_image_dir, read_threads=2,
-                                  num_epochs=FLAGS.epochs, batch_size=FLAGS.batch_size)
+        train_batch = style_input(train_image_dir, batch_size=FLAGS.batch_size, num_styles=num_styles, read_threads=2)
 
-        # Ignore labels
-        train_example_batch, _ = train_batch
+        # Get the input batches
+        image_batch, style_indices = train_batch
 
         global_step = tf.Variable(0, trainable=False, name='global_step', dtype=tf.int32)
 
-        # Alternates styles every 10 steps
-        style_index = tf.mod(tf.div(global_step, FLAGS.style_swap), num_styles)
-
         with tf.variable_scope('unet'):
             # Create the model with sliced instance norm
-            model = u_net.create_model(train_example_batch, num_styles,
-                                       style_index=style_index, sliced=True, trainable=True)
+            model = u_net.create_model(image_batch, num_styles,
+                                       style_indices=style_indices, sliced=True, trainable=True)
 
         print "Initializing unet variables"
         sess.run(u_net.variables_initializer())
@@ -128,18 +124,17 @@ def main(argv):
 
         # Re use the vgg model to get the content feature matrices
         with tf.variable_scope('vgg'):
-            vgg_batch = vgg16(train_example_batch, reuse=True)
+            vgg_batch = vgg16(image_batch, reuse=True)
 
         style_layers = ['conv1_2', 'conv2_2', 'conv3_3', 'conv4_3']
         content_layers = ['conv2_2']
 
         # Get the gram matrix stacks
-        gram_matrix_stacks = stack_gram_matrices(art_images, art_list,
-                                                 vgg_scope='vgg', style_layers=style_layers,
-                                                 sess=sess)
+        gram_matrix_stacks = stack_gram_matrices(art_images, art_list, style_indices=style_indices,
+                                                 vgg_scope='vgg', style_layers=style_layers, sess=sess)
 
         # Index the stack by style index
-        gram_matrices = map(lambda stack: stack[style_index], gram_matrix_stacks)
+        gram_matrices = map(lambda stack: stack, gram_matrix_stacks)
 
         # Get the style and content ops from the vgg instance running on top of the UNet model.
         content_layer_ops = map(lambda layer: vgg_model.get_layer(layer), content_layers)
@@ -204,8 +199,6 @@ def main(argv):
 
                 sys.stdout.flush()
                 sys.stdout.write('\r Step: %d' % step)
-                if FLAGS.log_style_index and (step - 1) % FLAGS.style_swap == 0:
-                    print "\rStyle Index: %d" % sess.run(style_index)
                 if (step - 1) % FLAGS.report_step == 0:
                     loss_val = sess.run(loss)
                     print "\rLoss for step %d: %f" % (step, loss_val)
