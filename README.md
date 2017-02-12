@@ -16,11 +16,12 @@ The web app supports user images in standard picture formats (JPG, PNG). Images 
 
 ##Outputs
 Some example pictures can be found below:
-![example 1](https://paint-me.me/images/cat.jpg)
-Undie Filter
 
-![example 2](https://paint-me.me/images/skyline.jpg)
+Undie Filter
+![example 1](https://paint-me.me/images/cat.jpg)
+
 Wave Filter
+![example 2](https://paint-me.me/images/skyline.jpg)
 
 ##License
 2017
