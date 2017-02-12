@@ -1,4 +1,4 @@
-# ![pAInt](https://paint-me.me/images/paint.png)
+# pAInt
 A neural style web app, created for **McHacks 2017**.
 https://paint-me.me
 
@@ -18,9 +18,11 @@ The web app supports user images in standard picture formats (JPG, PNG). Images 
 Some example pictures can be found below:
 
 Undie Filter
+
 ![example 1](https://paint-me.me/images/cat.jpg)
 
 Wave Filter
+
 ![example 2](https://paint-me.me/images/skyline.jpg)
 
 ##License
