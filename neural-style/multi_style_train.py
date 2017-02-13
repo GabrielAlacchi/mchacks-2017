@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import unet
+import model
 import tensorflow as tf
 import ops
 from style_input import style_input
@@ -98,8 +98,6 @@ def main(argv):
 
     with tf.Session() as sess:
 
-        u_net = unet.UNet()
-
         train_image_dir = path.join(FLAGS.image_dir, 'train2014')
 
         image_size = map(int, FLAGS.image_size.split(','))
@@ -116,11 +114,11 @@ def main(argv):
 
         with tf.variable_scope('unet'):
             # Create the model with sliced instance norm
-            model = u_net.create_model(image_batch, num_styles,
-                                       style_indices=style_indices, sliced=True, trainable=True)
+            transform = model.transform(image_batch, num_styles,
+                                        style_indices=style_indices, conditional=True, trainable=True)
 
         print "Initializing unet variables"
-        sess.run(u_net.variables_initializer())
+        sess.run(model.variables_initializer())
 
         print "Initializing vgg"
         with tf.variable_scope('vgg'):
@@ -148,28 +146,19 @@ def main(argv):
         # Get the feature matrices of the training batch operation
         feature_matrices = map(lambda layer: art.feature_matrix(vgg_batch.get_layer(layer)), content_layers)
 
-        # Compute the total loss, including summaries
-        loss = art.total_loss(model, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
+        # Compute the total loss, including summaries of content and style losses
+        loss = art.total_loss(transform, content_layer_ops, style_layer_ops, feature_matrices, gram_matrices,
                               alpha=FLAGS.content_alpha, beta=FLAGS.style_beta,
                               tv_weight=FLAGS.tv_weight, total_variation=False,
                               summaries=True, summary_scope='summaries')
 
-        unet_variables = tf.get_collection(unet.UNET_COLLECTION)
-
-        # Chilling out with the weight summaries
-        # with tf.name_scope('weight_summaries'):
-        #    print "Creating Variable Summaries..."
-        #    map(ops.variable_summaries, unet_variables)
+        unet_variables = tf.get_collection(model.MODEL_COLLECTION)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate, beta1=FLAGS.adam_beta1,
                                            beta2=FLAGS.adam_beta2, epsilon=FLAGS.adam_epsilon)
 
         with tf.name_scope('gradients'):
             grads = optimizer.compute_gradients(loss, var_list=unet_variables)
-
-        # with tf.name_scope('gradient_summaries'):
-        #     print "Creating Gradient Summaries..."
-        #     map(lambda grad: ops.variable_summaries(grad[0]), grads)
 
         with tf.name_scope('optimize'):
             train_step = optimizer.apply_gradients(grads, global_step=global_step, name='minimize')
@@ -200,7 +189,7 @@ def main(argv):
         elif FLAGS.restore_partial:
             # If we just want to restore the weights and biases (not instance norm parameters)
             ckpt = tf.train.get_checkpoint_state(checkpoint_dir=FLAGS.restore_partial)
-            u_net.restore_partial(ckpt.model_checkpoint_path, sess)
+            model.restore_partial(ckpt.model_checkpoint_path, sess)
 
         print "Starting training"
         try:

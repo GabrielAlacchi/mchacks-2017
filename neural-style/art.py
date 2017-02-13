@@ -8,8 +8,8 @@ import cv2
 from ops import tensor_size
 
 # Default hyper parameters
-ALPHA = 1e-1
-BETA = 1e-3
+ALPHA = 1.0
+BETA = 1e-4
 TV_WEIGHT = 1.0
 
 LEARNING_RATE = 10
@@ -51,29 +51,24 @@ def feature_matrix(layer):
 def gram_matrix(feature):
 
     shape = tf.shape(feature)
-    n_l = shape[1]
-    m_l = shape[2]
+    denominator = tf.to_float(shape[2])
 
-    multiplier = 1.0 / tf.cast(2 * n_l * m_l, dtype=tf.float32)
-    feature_norm = multiplier * feature
-    return tf.matmul(feature_norm, feature, transpose_b=True)
-
-    # return tf.matmul(feature, feature, transpose_b=True)
+    return tf.matmul(feature / denominator, feature, transpose_b=True)
 
 
 def content_loss(layer, p_l):
 
     f_l = feature_matrix(layer)
-    shape = tf.shape(f_l)
-    multiplier = 1.0 / tf.cast(shape[1] * shape[2], dtype=tf.float32)
-    return tf.reduce_mean(tf.reduce_sum(multiplier * (f_l - p_l) ** 2, reduction_indices=[1, 2]), axis=0)
+
+    # Mean squared error
+    return tf.reduce_mean((f_l - p_l) ** 2)
 
 
 def style_loss(layer, a_l):
 
     g_l = gram_matrix(feature_matrix(layer))
 
-    return tf.reduce_mean(tf.reduce_sum((g_l - a_l) ** 2, reduction_indices=[1, 2]), axis=0)
+    return tf.reduce_mean((g_l - a_l) ** 2)
 
 
 def total_loss(image, content_layers, style_layers, feature_matrices, gram_matrices,
