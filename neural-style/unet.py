@@ -83,13 +83,11 @@ class UNet:
         with tf.variable_scope('upsample_1', reuse=reuse):
             model = ops.upsample(model, filter_size=(3, 3), num_features=64, trainable=trainable,
                                  upscale=2, collection=UNET_COLLECTION)
-            model = tf.concat(values=[conv2_1, model], concat_dim=3)
             model = _norm(model)
 
         with tf.variable_scope('upsample_2', reuse=reuse):
             model = ops.upsample(model, filter_size=(3, 3), num_features=32, trainable=trainable,
                                  upscale=2, collection=UNET_COLLECTION)
-            model = tf.concat(values=[conv1_1, model], concat_dim=3)
             model = _norm(model)
 
         with tf.variable_scope('conv_output', reuse=reuse):

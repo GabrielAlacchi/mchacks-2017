@@ -22,6 +22,7 @@ flags.DEFINE_integer('report_step', 100, 'Step to report loss at')
 flags.DEFINE_integer('save_step', 1000, 'Step to save a checkpoint at')
 flags.DEFINE_float('learning_rate', 1e-3, 'Learning Rate.')
 flags.DEFINE_string('image_dir', 'data/img', 'Root where the test and train sub directories can be found')
+flags.DEFINE_string('image_size', '224,224', 'Size of the images to train on')
 
 # Tensorflow output
 flags.DEFINE_string('logdir', 'logdir', 'Model and logs directory')
@@ -31,7 +32,7 @@ flags.DEFINE_string('restore_partial', None, 'Checkpoint folder to restore weigh
 
 flags.DEFINE_float('adam_beta1', 0.9, 'Beta 1 for Adam Optimizer.')
 flags.DEFINE_float('adam_beta2', 0.999, 'Beta 2 for Adam Optimizer.')
-flags.DEFINE_float('adam_epsilon', 1e-1, 'Epsilon for Adam Optimizer.')
+flags.DEFINE_float('adam_epsilon', 1e-8, 'Epsilon for Adam Optimizer.')
 
 # Style parameters
 flags.DEFINE_string('art_list', 'images/art_list.json', 'The Images to Train Style for in a json file.')
@@ -101,11 +102,15 @@ def main(argv):
 
         train_image_dir = path.join(FLAGS.image_dir, 'train2014')
 
-        # Get the symbolic COCO input tensors
-        train_batch = style_input(train_image_dir, batch_size=FLAGS.batch_size, num_styles=num_styles, read_threads=2)
+        image_size = map(int, FLAGS.image_size.split(','))
 
-        # Get the input batches
-        image_batch, style_indices = train_batch
+        with tf.name_scope('style_input'):
+            # Get the symbolic COCO input tensors and style_indices
+            image_batch, style_indices = style_input(train_image_dir,
+                                                     image_size=image_size,
+                                                     batch_size=FLAGS.batch_size,
+                                                     num_styles=num_styles,
+                                                     read_threads=2)
 
         global_step = tf.Variable(0, trainable=False, name='global_step', dtype=tf.int32)
 
@@ -158,7 +163,16 @@ def main(argv):
 
         optimizer = tf.train.AdamOptimizer(learning_rate=FLAGS.learning_rate, beta1=FLAGS.adam_beta1,
                                            beta2=FLAGS.adam_beta2, epsilon=FLAGS.adam_epsilon)
-        train_step = optimizer.minimize(loss, global_step=global_step)
+
+        with tf.name_scope('gradients'):
+            grads = optimizer.compute_gradients(loss, var_list=unet_variables)
+
+        # with tf.name_scope('gradient_summaries'):
+        #     print "Creating Gradient Summaries..."
+        #     map(lambda grad: ops.variable_summaries(grad[0]), grads)
+
+        with tf.name_scope('optimize'):
+            train_step = optimizer.apply_gradients(grads, global_step=global_step, name='minimize')
 
         saver = tf.train.Saver(unet_variables + [global_step])
 

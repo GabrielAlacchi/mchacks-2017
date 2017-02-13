@@ -3,18 +3,21 @@ import tensorflow as tf
 from os import path, listdir
 
 
-def read_jpg(filename_queue):
+def read_jpg(filename_queue, image_size):
     reader = tf.WholeFileReader(name='file_reader')
     key, record_string = reader.read(filename_queue)
-    example = tf.image.decode_jpeg(record_string, name='decode_jpeg')
+    example = tf.image.decode_jpeg(record_string, name='decode_jpeg', channels=3)
 
     # Cast and reshape (This assumes the images are 224 * 224 * 3).
-    example = tf.cast(tf.reshape(example, shape=(224, 224, 3)),
-                      dtype=tf.float32, name='image_input')
-    return example
+    example = tf.image.resize_image_with_crop_or_pad(example, *image_size)
+    return tf.cast(example, dtype=tf.float32, name='training_image')
 
 
-def style_input(train_image_dir, batch_size, min_after_dequeue=5, read_threads=1, num_styles=1):
+def style_input(train_image_dir, batch_size, image_size=None, min_after_dequeue=5, read_threads=1, num_styles=1):
+
+    if not image_size:
+        image_size = (256, 256)
+
     train_filenames = [path.join(train_image_dir, f) for f in listdir(train_image_dir)]
     train_filenames = tf.constant(train_filenames, name='filenames')
 
@@ -25,7 +28,7 @@ def style_input(train_image_dir, batch_size, min_after_dequeue=5, read_threads=1
     style_index_queue = tf.train.range_input_producer(num_styles, shuffle=True)
     style_example = style_index_queue.dequeue()
 
-    image_example = read_jpg(train_queue)
+    image_example = read_jpg(train_queue, image_size=image_size)
 
     capacity = min_after_dequeue + 3 * batch_size
 

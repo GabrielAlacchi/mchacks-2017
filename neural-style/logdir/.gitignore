@@ -1,6 +1,9 @@
 *.npz
+
 mosaic
 painter
+vangogh
+
 events*
 *.data*
 *.index

@@ -11,7 +11,7 @@ flags = tf.app.flags
 flags.DEFINE_string('logdir', 'logdir', 'Logdir where checpoints can be found')
 flags.DEFINE_string('input_image', 'images/montreal.jpg', 'Image to stylize')
 flags.DEFINE_string('outfile', 'images/result.jpg', 'Output file')
-flags.DEFINE_integer('style_index', 0, 'Style index to use.')
+flags.DEFINE_string('style_name', 'mosaic', 'Style name to use.')
 
 FLAGS = flags.FLAGS
 
@@ -25,14 +25,15 @@ def main(argv):
         art_index = json.load(f)
 
     num_styles = len(art_index.keys())
-    style_index = FLAGS.style_index
+    style_name = FLAGS.style_name
 
-    style_name_list = filter(lambda item: item[1] == style_index, art_index.iteritems())
-    if len(style_name_list) != 1:
-        print "Style index not in the model %d" % style_index
+    if style_name not in art_index:
+        print "Style is not in the model %s" % style_name
         exit(-1)
     else:
-        print "Using style %s" % style_name_list[0][0]
+        print "Using style %s" % style_name
+
+    style_index = art_index[style_name]
 
     im_shape = list(image.shape)
     resize = False

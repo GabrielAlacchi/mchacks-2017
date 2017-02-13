@@ -205,8 +205,14 @@ def conditional_instance_norm(x, style_indices, num_styles, trainable=True, coll
                            collections=[collection])
 
     # Gather according to the style indices
-    gamma = tf.gather(gamma, style_indices, name='conditional_scale')
-    beta = tf.gather(beta, style_indices, name='conditional_offset')
+    gamma = tf.gather(gamma, style_indices)
+    beta = tf.gather(beta, style_indices)
+
+    def _expand(var, name):
+        return tf.expand_dims(tf.expand_dims(var, axis=1), axis=1, name=name)
+
+    gamma = _expand(gamma, name='conditional_scale')
+    beta = _expand(beta, name='conditional_offset')
 
     return instance_norm(x, gamma, beta, trainable=trainable, collection=collection)
 
