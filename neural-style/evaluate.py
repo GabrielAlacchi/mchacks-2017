@@ -1,7 +1,7 @@
 
 import tensorflow as tf
 import numpy as np
-import unet
+import model
 import cv2
 import simplejson as json
 from os import path
@@ -55,17 +55,16 @@ def main(argv):
     style_weights = tf.constant(style_weight_list, dtype=tf.float32)
 
     with tf.variable_scope('unet'):
-        net = unet.UNet()
-        model = net.create_model(image_tens, num_styles, style_weights=style_weights, trainable=False)
+        transform = model.transform(image_tens, num_styles, style_weights=style_weights, trainable=False)
 
     with tf.Session() as sess:
 
         checkpoints = tf.train.get_checkpoint_state(FLAGS.logdir)
-        unet_variables = tf.get_collection(unet.UNET_COLLECTION)
+        unet_variables = tf.get_collection(model.MODEL_COLLECTION)
         saver = tf.train.Saver(unet_variables)
         saver.restore(sess, checkpoints.model_checkpoint_path)
 
-        output = sess.run(model)
+        output = sess.run(transform)
         output = np.squeeze(output)
 
         output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
