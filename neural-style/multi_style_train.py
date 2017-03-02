@@ -122,7 +122,7 @@ def main(argv):
 
         print "Initializing vgg"
         with tf.variable_scope('vgg'):
-            vgg_model = vgg16(model, reuse=False)
+            vgg_model = vgg16(transform, reuse=False)
             vgg_model.load_weights('weights/vgg16_weights.npz', sess)
 
         # Re use the vgg model to get the content feature matrices
